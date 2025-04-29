@@ -11,67 +11,109 @@
     <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Home</a>
 
     <h1>Booting on Real Raspberry Pi 3B Hardware</h1>
-    <p class="lead">What actually happens between powering on your Pi and your C code executing? Let’s walk through the full boot pipeline.</p>
+    <p class="lead">How does your code actually start running on bare metal? Let’s break down how the Raspberry Pi 3B boots and how we can safely enter C code from EL2.</p>
 
     <hr>
 
-    <h2>🔌 Power-On to GPU Boot</h2>
+    <h2>From Power-On to `kernel8.img`</h2>
     <p>
-      The Raspberry Pi 3B begins execution from a small bit of on-chip ROM. This code runs on the <strong>GPU</strong>, not the CPU. The GPU looks for files on the SD card — specifically a FAT32 partition with a file named <code>bootcode.bin</code>, and then <code>start.elf</code>. These are part of the closed-source GPU firmware provided by the Raspberry Pi Foundation.
+      When the Raspberry Pi 3B powers on, it starts in a small bit of read-only memory (ROM) inside the GPU. This ROM loads <code>bootcode.bin</code> and then <code>start.elf</code> from the SD card’s FAT32 partition.
     </p>
     <p>
-      Once loaded, <code>start.elf</code> initializes the board’s hardware and then loads your <code>kernel8.img</code> into memory and jumps to it. If you're targeting AArch64 (64-bit mode), this file should contain your bare-metal kernel.
+      These closed-source binaries initialize the hardware and finally load your <code>kernel8.img</code> into memory. If you're targeting AArch64 (64-bit), <code>kernel8.img</code> should contain your bare-metal OS.
     </p>
 
-    <h2>Entry Point: <code>_start</code></h2>
+    <h2>First Stop: <code>_start</code></h2>
     <p>
-      The GPU jumps to the <code>_start</code> symbol inside your <code>kernel8.img</code>. This is the first instruction the CPU executes. At this point, the CPU is in EL2 (hypervisor mode) by default, and only core 0 is running.
+      Once the firmware hands control to your code, execution begins at the symbol <code>_start</code>. The CPU starts in EL2 (Hypervisor mode) by default, and only <strong>core 0</strong> is active.
     </p>
     <p>
-      Your job here is to:
+      Our job is to:
       <ul>
-        <li>Lower the CPU to EL1 or EL0 (depending on your design)</li>
-        <li>Set up the stack pointer</li>
-        <li>Optionally initialize exception vectors and MMU</li>
-        <li>Branch to your <code>main()</code> function in C</li>
+        <li>Ensure only core 0 continues into the boot process</li>
+        <li>Disable traps that would crash us in C</li>
+        <li>Switch from EL2 to EL1 (the normal OS privilege level)</li>
+        <li>Jump to our kernel C code</li>
       </ul>
     </p>
 
-    <h2>What About the Other Cores?</h2>
-    <p>
-      When the Pi boots, only <strong>core 0</strong> is executing. The other cores (1–3) are parked in a spin loop at an address in memory (usually around <code>0x00000000</code>). You can direct them to your own entry point by writing to <code>mailbox</code> addresses or defining startup trampolines.
-    </p>
-    <p>
-      A simple strategy is to write an entry address for each core and send a "go" signal via memory-mapped mailboxes. In your assembly <code>_start</code>, you can then distinguish each core using the <code>mpidr_el1</code> register and direct them appropriately.
-    </p>
+    <h2>🔧 Minimal Boot Code</h2>
+    <p>This is the minimal working code that sets up EL1 and calls your C entry point:</p>
 
-    <h2>Minimal Example</h2>
-    <pre><code>_start:
-  // Set up stack
-  ldr x0, =_stack_top
-  mov sp, x0
+    <pre><code>.section ".text.boot"
+.global _start
+_start:
+    // Only core 0 continues
+    mrs x0, mpidr_el1
+    and x0, x0, #0xFF
+    cbz x0, master
+hang:
+    wfe
+    b hang
 
-  // Get core ID
-  mrs x1, mpidr_el1
-  and x1, x1, #0x3      // core ID in bits [1:0]
+master:
+    // Set stack for EL1
+    ldr x0, =LOW_MEMORY
+    msr sp_el1, x0
 
-  cmp x1, #0
-  b.eq core0_main
-  b    coreX_wait       // Park other cores
+    // Disable traps and enable FP/SIMD for C compatibility
+    mov x0, #0x33FF
+    msr cptr_el2, x0
+    msr hstr_el2, xzr
+    mrs x0, cpacr_el1
+    orr x0, x0, #(0b11 << 20)
+    msr cpacr_el1, x0
 
-core0_main:
-  bl main
-  b .
+    // Enable AArch64 for EL1
+    mov x0, #(1 << 31)
+    msr hcr_el2, x0
 
-coreX_wait:
-  wfe
-  b coreX_wait
+    // Set return state: EL1h mode, interrupts masked
+    mov x0, #0x3C5
+    msr spsr_el2, x0
+
+    // Set return address to EL1 entry point
+    adr x0, el1_entry
+    msr elr_el2, x0
+
+    // Drop to EL1
+    eret
+
+el1_entry:
+    mov sp, #LOW_MEMORY
+    bl primary_kernel_init
+    b .
 </code></pre>
 
-    <p>This assembly shows how to set up basic multi-core awareness at boot time.</p>
+    <p>This code ensures a clean transition into EL1, which is where your kernel’s C code will begin running.</p>
+
+    <h2>Why We Disable Traps</h2>
+    <p>
+      The ARM architecture starts with traps enabled by default. If you don’t explicitly disable them, even basic C code may crash when it implicitly uses floating point registers or system instructions. We fix this by:
+    </p>
+    <ul>
+      <li>Disabling FP/SIMD traps via <code>cptr_el2</code></li>
+      <li>Allowing EL1 access to FP/SIMD via <code>cpacr_el1</code></li>
+      <li>Clearing <code>hstr_el2</code> to avoid trapping sysregs</li>
+    </ul>
+
+    <h2>What About the Other Cores?</h2>
+    <p>
+      On boot, only core 0 runs your code. Cores 1–3 spin in a parking loop. Later, you can wake them using memory-mapped addresses or inter-core signaling with <code>sev</code>.
+    </p>
+
+    <h2>Next Steps</h2>
+    <p>
+      Now that we're in EL1 and running C code, the next steps are:
+      <ul>
+        <li>Setting up the MMU</li>
+        <li>Enabling the data cache</li>
+        <li>Initializing UART for early printf-style debugging</li>
+      </ul>
+    </p>
 
     <hr>
-    <p><em>Next up: we’ll talk about setting up the MMU and enabling data caching — key steps to unlocking atomic instructions and improving performance.</em></p>
+    <p><em>Up next: we’ll walk through enabling the MMU and using the data cache — a key step in getting atomic instructions and virtual memory working correctly.</em></p>
 
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
