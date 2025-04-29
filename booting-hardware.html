@@ -10,7 +10,7 @@
   <div class="container py-5">
     <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Home</a>
 
-    <h1>🧼 Booting on Real Raspberry Pi 3B Hardware</h1>
+    <h1>🧠 Booting on Real Raspberry Pi 3B Hardware</h1>
     <p class="lead">What actually happens between powering on your Pi and your C code executing? Let’s walk through the full boot pipeline.</p>
 
     <hr>
@@ -39,10 +39,51 @@
 
     <h2>🧠 What About the Other Cores?</h2>
     <p>
-      When the Pi boots, only <strong>core 0</strong> is executing. The other cores (1–3) are parked in a spin loop at an address in memory (usually <code>0x00000000</code>). You can direct them to your own entry point by writing to <code>mailbox</code> addresses or defining startup trampolines.
+      When the Pi boots, only <strong>core 0</strong> is executing. The other cores (1–3) are parked in a spin loop at an address in memory (usually around <code>0x00000000</code>). You can direct them to your own entry point by writing to <code>mailbox</code> addresses or defining startup trampolines.
     </p>
     <p>
       A simple strategy is to write an entry address for each core and send a "go" signal via memory-mapped mailboxes. In your assembly <code>_start</code>, you can then distinguish each core using the <code>mpidr_el1</code> register and direct them appropriately.
+    </p>
+
+    <h2>🛠️ Setting up <code>config.txt</code></h2>
+    <p>
+      The Raspberry Pi relies on a configuration file named <code>config.txt</code> stored in the FAT32 boot partition. This file tells the GPU firmware how to initialize the hardware before jumping to your kernel.
+    </p>
+    <p>
+      For bare-metal development, it’s crucial to modify <code>config.txt</code> to ensure that the firmware:
+      <ul>
+        <li>Boots in <strong>64-bit mode</strong> (required for <code>kernel8.img</code>)</li>
+        <li>Disables features that interfere with your setup (like Bluetooth overlays)</li>
+        <li>Stops passing Linux-specific boot arguments</li>
+      </ul>
+    </p>
+
+    <h3>🔧 Minimal Necessary Settings</h3>
+    <p>
+      Here's the important part of the <code>config.txt</code> that makes bare-metal booting work correctly:
+    </p>
+
+    <pre><code># Run in 64-bit mode
+arm_64bit=1
+
+# Disable HDMI overscan
+disable_overscan=1
+
+# Disable Bluetooth overlay
+dtoverlay=disable-bt
+
+# Prevent the firmware from modifying the command line
+disable_commandline_tags=1
+
+# Disable automatic UART initialization
+uart_enable=0
+</code></pre>
+
+    <p>
+      These settings ensure your CPU boots into the correct mode and that no unexpected Linux configuration interferes with your low-level initialization.
+    </p>
+    <p>
+      You can leave the other commented-out options in <code>config.txt</code> alone for now; they're useful for HDMI tuning, overclocking, or enabling interfaces like I2C and SPI, which we'll cover in future posts.
     </p>
 
     <h2>🧪 Minimal Example</h2>
