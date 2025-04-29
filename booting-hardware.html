@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booting on Real Hardware | Diego's Bare-Metal Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light text-dark">
+  <div class="container py-5">
+    <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Home</a>
+
+    <h1>🧼 Booting on Real Raspberry Pi 3B Hardware</h1>
+    <p class="lead">What actually happens between powering on your Pi and your C code executing? Let’s walk through the full boot pipeline.</p>
+
+    <hr>
+
+    <h2>🔌 Power-On to GPU Boot</h2>
+    <p>
+      The Raspberry Pi 3B begins execution from a small bit of on-chip ROM. This code runs on the <strong>GPU</strong>, not the CPU. The GPU looks for files on the SD card — specifically a FAT32 partition with a file named <code>bootcode.bin</code>, and then <code>start.elf</code>. These are part of the closed-source GPU firmware provided by the Raspberry Pi Foundation.
+    </p>
+    <p>
+      Once loaded, <code>start.elf</code> initializes the board’s hardware and then loads your <code>kernel8.img</code> into memory and jumps to it. If you're targeting AArch64 (64-bit mode), this file should contain your bare-metal kernel.
+    </p>
+
+    <h2>📍 Entry Point: <code>_start</code></h2>
+    <p>
+      The GPU jumps to the <code>_start</code> symbol inside your <code>kernel8.img</code>. This is the first instruction the CPU executes. At this point, the CPU is in EL2 (hypervisor mode) by default, and only core 0 is running.
+    </p>
+    <p>
+      Your job here is to:
+      <ul>
+        <li>Lower the CPU to EL1 or EL0 (depending on your design)</li>
+        <li>Set up the stack pointer</li>
+        <li>Optionally initialize exception vectors and MMU</li>
+        <li>Branch to your <code>main()</code> function in C</li>
+      </ul>
+    </p>
+
+    <h2>🧠 What About the Other Cores?</h2>
+    <p>
+      When the Pi boots, only <strong>core 0</strong> is executing. The other cores (1–3) are parked in a spin loop at an address in memory (usually <code>0x00000000</code>). You can direct them to your own entry point by writing to <code>mailbox</code> addresses or defining startup trampolines.
+    </p>
+    <p>
+      A simple strategy is to write an entry address for each core and send a "go" signal via memory-mapped mailboxes. In your assembly <code>_start</code>, you can then distinguish each core using the <code>mpidr_el1</code> register and direct them appropriately.
+    </p>
+
+    <h2>🧪 Minimal Example</h2>
+    <pre><code>_start:
+  // Set up stack
+  ldr x0, =_stack_top
+  mov sp, x0
+
+  // Get core ID
+  mrs x1, mpidr_el1
+  and x1, x1, #0x3      // core ID in bits [1:0]
+
+  cmp x1, #0
+  b.eq core0_main
+  b    coreX_wait       // Park other cores
+
+core0_main:
+  bl main
+  b .
+
+coreX_wait:
+  wfe
+  b coreX_wait
+</code></pre>
+
+    <p>This assembly shows how to set up basic multi-core awareness at boot time.</p>
+
+    <hr>
+    <p><em>Next up: we’ll talk about setting up the MMU and enabling data caching — key steps to unlocking atomic instructions and improving performance.</em></p>
+
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
