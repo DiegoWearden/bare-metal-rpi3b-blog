@@ -4,31 +4,55 @@
   <meta charset="UTF-8">
   <title>Diego's Bare-Metal RPi Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap CSS CDN -->
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light text-dark">
+<body class="bg-light">
 
   <div class="container py-5">
-    <h1 class="mb-3">🔧 Diego's Bare-Metal Raspberry Pi Blog</h1>
-    <p class="lead">Exploring low-level systems programming on the Raspberry Pi 3B — from QEMU to real hardware.</p>
+    <h1 class="mb-4">🧠 Diego's Bare-Metal Raspberry Pi Blog</h1>
+    <p class="lead">From booting your first kernel to enabling multi-core support and configuring the MMU — everything you need to go from 0 to OS on the Raspberry Pi 3B.</p>
 
     <hr class="my-4">
 
-    <h2>📚 Posts</h2>
+    <h2 class="mb-3">🚀 Bootstrapping the Pi</h2>
+    <ul class="list-group mb-4">
+      <li class="list-group-item">
+        <a href="booting-hardware.html"><strong>Getting to C on Real Hardware</strong></a><br>
+        How to get code booting on the Raspberry Pi 3B and bring all cores into the C environment.
+      </li>
+    </ul>
+
+    <h2 class="mb-3">🧩 Memory Management</h2>
+    <ul class="list-group mb-4">
+      <li class="list-group-item">
+        <a href="mmu-and-cache.html"><strong>Enabling the MMU & Data Cache</strong></a><br>
+        Why you need the MMU for atomic instructions and how to turn on the data cache.
+      </li>
+    </ul>
+
+    <h2 class="mb-3">🖥️ Future Topics (Coming Soon)</h2>
     <ul class="list-group">
       <li class="list-group-item">
-        <a href="post1.html">Booting a Raspberry Pi 3B from Scratch</a>
-        <small class="text-muted d-block">Learn how the Pi boots and how to load your first kernel.</small>
+        <a href="hdmi-output.html"><strong>HDMI Output</strong></a><br>
+        (Coming soon) How to get pixels on the screen.
       </li>
       <li class="list-group-item">
-        <a href="post2.html">QEMU vs Real Hardware: Key Differences</a>
-        <small class="text-muted d-block">Why your code might work in QEMU but fail on hardware.</small>
+        <a href="usb-drivers.html"><strong>USB Drivers</strong></a><br>
+        (Coming soon) Writing a USB host driver for input devices.
+      </li>
+      <li class="list-group-item">
+        <a href="audio-output.html"><strong>Audio Output</strong></a><br>
+        (Coming soon) Getting sound through PWM or HDMI.
+      </li>
+      <li class="list-group-item">
+        <a href="sd-card.html"><strong>SD Card Drivers</strong></a><br>
+        (Coming soon) Communicating with the SD card to read files.
       </li>
     </ul>
   </div>
 
-  <!-- Bootstrap JS (Optional) -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
