@@ -17,8 +17,9 @@
 
     <h2>1. GPU Firmware to Kernel Handoff</h2>
     <p>
-      On reset, the GPU’s on-chip ROM loads <code>bootcode.bin</code> (initializes SDRAM) and then <code>start.elf</code> (configures clocks, power, etc.). Finally it reads <code>kernel8.img</code> into RAM and jumps to your <code>_start</code> label, running in EL2 on core 0.
+      When you power on the Raspberry Pi 3B, it’s not the CPU that wakes up first—it’s the GPU. A tiny bit of on-chip ROM code springs into action and kicks off the boot process by loading <code>bootcode.bin</code>, which sets up the SDRAM so there’s actually usable memory. Next, it loads <code>start.elf</code>, a binary that takes care of hardware setup like clocks and power rails. Once the system is stable, the GPU hands control over to you by loading your <code>kernel8.img</code> into memory and jumping straight into your code at the <code>_start</code> label—executing on core 0 in EL2.
     </p>
+    
 
     <h2>2. “Who Am I?”: Core ID Check</h2>
     <pre><code>_start:
