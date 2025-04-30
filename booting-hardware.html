@@ -9,7 +9,7 @@
 <body class="bg-light text-dark">
   <div class="container py-5">
     <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Home</a>
-    <h1>Booting on Real Raspberry Pi 3B Hardware</h1>
+    <h1>Getting to C on Real Hardware</h1>
     <p class="lead">
       Here’s how the Pi goes from power-on ROM to running your first C function in EL1. We’ll walk through each assembly step on the primary core, then show how the other cores join in.
     </p>
@@ -30,13 +30,18 @@
       This snippet reads the Multiprocessor ID register to distinguish core 0 from cores 1–3. Only core 0 proceeds; the rest enter a wait loop.
     </p>
 
-    <h2>3. Parking Other Cores</h2>
+    <h2>3. Parking Secondary Cores</h2>
     <pre><code>proc_hang:
-    wfe                        // low-power wait
-    b     proc_hang            // spin</code></pre>
+        wfe                     // Wait For Event: core goes into a low-power sleep
+        b     proc_hang         // loop back and sleep again</code></pre>
     <p>
-      Each secondary core waits here until we explicitly wake it with a <code>sev</code> instruction later on.
+      Although on the real Pi 3B only core 0 ever enters our <code>_start</code> sequence at reset, we include this “parking” loop for cores 1–3 in case they do reach our code (for example in simulators or future platforms). Any core that branches here will sleep in place:  
+      1. <code>wfe</code> halts the core until an event (a <code>sev</code>) arrives.  
+      2. The branch back to <code>proc_hang</code> ensures it goes right back to sleep if no new work is ready.  
+    
+      In actual hardware, cores 1–3 start stalled inside the GPU’s ROM spin-loop and only get released when the primary core writes their start address into the mailboxes and issues <code>sev</code>. Once they land in our <code>secondary_kernel_main</code> code, this same parking loop is never used—instead, they follow the “wakeup” path we explicitly drive.  
     </p>
+    
 
     <h2>4. Disabling Traps in EL2</h2>
     <pre><code>master:
