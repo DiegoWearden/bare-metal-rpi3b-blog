@@ -15,19 +15,19 @@
     </p>
     <hr>
 
-    <h2>🔌 1. Power-On to <code>kernel8.img</code></h2>
+    <h2>Power-On to <code>kernel8.img</code></h2>
     <p>
-      On reset, the Broadcom SoC’s **on-chip ROM** (running on the GPU) reads the SD card’s FAT32 boot partition. It first loads:
+      On reset, the Broadcom SoC’s on-chip ROM (running on the GPU) reads the SD card’s FAT32 boot partition. It first loads:
     </p>
     <ul>
       <li><code>bootcode.bin</code> → initializes SDRAM</li>
       <li><code>start.elf</code> → the closed-source GPU firmware</li>
     </ul>
     <p>
-      Finally, <code>start.elf</code> reads and copies your <code>kernel8.img</code> into RAM and jumps to its entry point—your `_start` label—running initially in EL2 on **core 0**.
+      Finally, <code>start.elf</code> reads and copies your <code>kernel8.img</code> into RAM and jumps to its entry point—your `_start` label—running initially in EL2 on core 0.
     </p>
 
-    <h2>🧵 2. Core ID Check & Secondary Parking</h2>
+    <h2>Core ID Check & Secondary Parking</h2>
     <pre><code>_start:
     mrs   x0, mpidr_el1
     and   x0, x0, #0xFF        // core ID = bits[7:0]
@@ -74,7 +74,7 @@
       - <code>VBAR_EL1</code> → where EL1 exception handlers live.
     </p>
 
-    <h2>🔁 5. Prepare & Perform EL2→EL1 Transition</h2>
+    <h2>Prepare & Perform EL2→EL1 Transition</h2>
     <pre><code>    // Prepare return to EL1h (mask interrupts)
     mov   x0, #0x3C4
     msr   spsr_el2, x0
@@ -90,7 +90,7 @@
       - <code>eret</code>: performs the switch into EL1.
     </p>
 
-    <h2>🛠️ 6. EL1 Entry, BSS Clear & Stack Setup</h2>
+    <h2>EL1 Entry, BSS Clear & Stack Setup</h2>
     <pre><code>el1_entry:
     // Zero .bss
     adr   x0, __bss_start
@@ -110,7 +110,7 @@
       <li>We explicitly set <code>sp</code> in EL1 (not via <code>sp_el1</code>), then call C.</li>
     </ul>
 
-    <h2>🚀 7. Waking Secondary Cores</h2>
+    <h2>Waking Secondary Cores</h2>
     <pre><code>wake_up_cores:
     adr   x0, secondary
     str   x0, [0xE0]           // entry for core 1
@@ -118,7 +118,7 @@
     str   x0, [0xF0]           // core 3
     sev                         // send-event wakes them</code></pre>
 
-    <h2>👥 8. Secondary Core Startup in EL1</h2>
+    <h2>Secondary Core Startup in EL1</h2>
     <pre><code>secondary_kernel_main:
     // compute per-core stack
     mrs   x0, mpidr_el1
@@ -136,7 +136,7 @@
       Secondary cores skip the EL2 setup (it was done once globally) and simply set up their own C stack in EL1 before calling C.
     </p>
 
-    <h2>⚡️ 9. Exception Vector Table</h2>
+    <h2>Exception Vector Table</h2>
     <pre><code>.align 11
 _vectors:
   // sync
