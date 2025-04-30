@@ -54,9 +54,6 @@
      bl    primary_kernel_init
      b     proc_hang        // should never come here
  
-secondary:
-
- 
  setup_el1_for_secondary:
      // Disable coprocessor in EL2
      mov     x0, #0x33FF
@@ -77,6 +74,9 @@ secondary:
      adr x0, secondary_kernel_main
      msr elr_el2, x0
  
+     // Transition to EL1
+     eret
+ 
  secondary_kernel_main:
     mrs x0, mpidr_el1
     and x0, x0, #0xFF
@@ -92,7 +92,7 @@ secondary:
  .global wake_up_cores
  wake_up_cores:
      mov x0, #0
-     adr x0, secondary
+     adr x0, setup_el1_for_secondary
      mov x1, #0xe0
      str x0, [x1]
      mov x1, #0xe8

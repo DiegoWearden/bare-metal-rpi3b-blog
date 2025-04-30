@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Booting on Real Raspberry Pi 3B Hardware</title>
+  <title>Booting on Raspberry Pi 3B Hardware</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -119,55 +119,122 @@
 
     <h2>8. Waking Up Secondary Cores</h2>
     <pre><code>wake_up_cores:
-    adr   x0, secondary
-    str   x0, [0xE0]           // entry for core 1
-    str   x0, [0xE8]           // core 2
-    str   x0, [0xF0]           // core 3
-    sev                        // send event</code></pre>
+        adr   x0, setup_el1_for_secondary
+        str   x0, [0xE0]           // entry for core 1
+        str   x0, [0xE8]           // core 2
+        str   x0, [0xF0]           // core 3
+        sev                        // send event</code></pre>
     <p>
-      Writing our EL1 entry address into each core’s mailbox and issuing <code>sev</code> wakes them from their <code>wfe</code> loops.
+      When the Raspberry Pi powers on, only core 0 begins execution. The other cores are held in a low-power state using the <code>wfe</code> instruction. To bring them online, we write the address of our secondary core entry point into fixed memory locations that act as mailboxes for each core: 0xE0 for core 1, 0xE8 for core 2, and 0xF0 for core 3. These are monitored by the firmware. After writing the addresses, the <code>sev</code> instruction is used to broadcast a signal that wakes all sleeping cores.
+    
+      This function is typically called after core 0 has completed its early initialization tasks. That includes setting up the UART, enabling <code>printf</code>, configuring the heap, and bringing up any necessary drivers or subsystems. By the time the secondary cores start running, the system is already in a usable state. This avoids repeating expensive initialization steps on every core and lets the secondaries immediately start using the infrastructure set up by core 0.
     </p>
 
-    <h2>9. Secondary Core Initialization</h2>
+    <h2>9. EL2-to-EL1 Transition for Secondary Cores</h2>
+    <pre><code>
+    setup_el1_for_secondary:
+    mov   x0, #0x33FF
+    msr   cptr_el2, x0         // disable coprocessor traps
+    msr   hstr_el2, xzr        // disable sysreg traps
+    mov   x0, #(3 << 20)
+    msr   cpacr_el1, x0        // enable FP/SIMD in EL1
+
+    ldr   x0, =HCR_VALUE
+    msr   hcr_el2, x0          // set EL1 to run in AArch64
+
+    ldr   x0, =SPSR_VALUE
+    msr   spsr_el2, x0         // saved program status for EL1
+
+    adr   x0, secondary_kernel_main
+    msr   elr_el2, x0          // where execution resumes in EL1
+
+    eret                        // drop to EL1</code></pre>
+    <p>
+  After each secondary core is woken up, it begins in EL2. Just like with core 0, we need to prepare for the switch into EL1. This involves disabling traps that would otherwise cause EL1 to fault if it accessed FP/SIMD or system registers. We then set <code>HCR_EL2</code> so that EL1 runs in 64-bit mode.
+
+  Next, we set <code>SPSR_EL2</code> to configure how the processor will behave when entering EL1. We set <code>ELR_EL2</code> to the address of <code>secondary_kernel_main</code>, which is where the core will jump once it exits EL2.
+
+  Finally, we call <code>eret</code>, which exits the current exception level and transfers control to EL1. From this point on, the core is running in the same environment as core 0.
+    </p>
+
+    
+    
+    
+
+    <h2>10. Secondary Core Initialization</h2>
     <pre><code>secondary_kernel_main:
-    mrs   x0, mpidr_el1
-    and   x0, x0, #0xFF
-    mov   x1, #SECTION_SIZE
-    mul   x1, x1, x0
-    add   x1, x1, #LOW_MEMORY
-    mov   sp, x1               // temporary stack
-
-    bl    pickKernelStack
-    mov   sp, x0               // final stack
-
-    bl    secondary_kernel_init
-    b     proc_hang</code></pre>
+        mrs   x0, mpidr_el1
+        and   x0, x0, #0xFF
+        mov   x1, #SECTION_SIZE
+        mul   x1, x1, x0
+        add   x1, x1, #LOW_MEMORY
+        mov   sp, x1               // temporary stack
+    
+        bl    pickKernelStack
+        mov   sp, x0               // final stack
+    
+        bl    secondary_kernel_init
+        b     proc_hang</code></pre>
     <p>
-      Each secondary core, after <code>eret</code>, runs this exact stack-setup in EL1 before calling its C init function.
+      After <code>eret</code> brings a secondary core into EL1, execution begins here. The first step is to establish a usable stack. We calculate a temporary stack address using the core ID, ensuring that each core lands on its own region of memory without overlapping with others.
+    
+      Once the temporary stack is in place, we call <code>pickKernelStack</code> to get the actual per-core stack pointer, which is aligned and allocated from a static array. This value replaces the temporary one, and the core now has a proper stack to use.
+    
+      From there, we call <code>secondary_kernel_init</code>, which is the C-level entry point for non-primary cores. At this point, the core is ready to run in parallel with the rest of the system and can perform whatever tasks are assigned to it. We branch to proc_hang afterwards as a failsafe inces it ever returns from <code>secondary_kernel_init</code>, this it never is supposed to.
     </p>
+    
 
-    <h2>10. Exception Vector Table</h2>
-    <pre><code>.align 11
-_vectors:
-  // synchronous
-  .align 7
-  mov x0,#0; mrs x1,esr_el1; mrs x2,elr_el1; mrs x3,spsr_el1; mrs x4,far_el1
-  b   exc_handler
-
-  // IRQ
-  .align 7
-  mov x0,#1; mrs x1,esr_el1; mrs x2,elr_el1; mrs x3,spsr_el1; mrs x4,far_el1
-  b   exc_handler
-
-  // FIQ and SError follow the same pattern…</code></pre>
+    <h2>11. Exception Vector Table</h2>
+    <pre><code>    .align 11
+    _vectors:
+        // Synchronous
+        .align  7
+        mov     x0, #0
+        mrs     x1, esr_el1
+        mrs     x2, elr_el1
+        mrs     x3, spsr_el1
+        mrs     x4, far_el1
+        b       exc_handler
+    
+        // IRQ
+        .align  7
+        mov     x0, #1
+        mrs     x1, esr_el1
+        mrs     x2, elr_el1
+        mrs     x3, spsr_el1
+        mrs     x4, far_el1
+        b       exc_handler
+    
+        // FIQ
+        .align  7
+        mov     x0, #2
+        mrs     x1, esr_el1
+        mrs     x2, elr_el1
+        mrs     x3, spsr_el1
+        mrs     x4, far_el1
+        b       exc_handler
+    
+        // SError
+        .align  7
+        mov     x0, #3
+        mrs     x1, esr_el1
+        mrs     x2, elr_el1
+        mrs     x3, spsr_el1
+        mrs     x4, far_el1
+        b       exc_handler</code></pre>
     <p>
-      This table routes synchronous exceptions, IRQ, FIQ, and SError to your common <code>exc_handler</code>.
+      This is our exception vector table for EL1. It defines how the CPU should respond to various kinds of exceptions: synchronous faults, IRQs, FIQs, and system errors (SError). Each entry is 128 bytes apart, which is required for proper alignment when the processor jumps to a specific offset in the table based on the exception type.
+    
+      For each case, we load key registers into known locations: 
+      <code>ESR_EL1</code> tells us what caused the exception, 
+      <code>ELR_EL1</code> stores the address the CPU was executing when it happened, 
+      <code>SPSR_EL1</code> is the saved program status, and 
+      <code>FAR_EL1</code> gives the faulting address (for memory-related exceptions). 
+      We also store an ID in <code>x0</code> to help the common handler distinguish the source.
+    
+      Finally, we branch to a shared <code>exc_handler</code>, where the exception is logged, handled, or causes a panic depending on the context. This keeps all exception types unified in a single place while still giving us the details needed to differentiate them.
     </p>
-
-    <hr>
-    <p>
-      We’ve kept every step explicit: disabling traps, configuring the hypervisor, performing the <code>eret</code> handoff, clearing memory, and setting the stack by hand. This approach puts you in full control of the Pi 3B’s boot sequence before any of your C code runs.
-    </p>
+    
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

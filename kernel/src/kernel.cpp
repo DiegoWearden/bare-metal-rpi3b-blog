@@ -39,5 +39,6 @@ extern "C" void primary_kernel_init() {
 
 void kernel_init(){
     printf("Hi, I'm core %d\n", getCoreID());
+    printf("in EL: %d\n", get_el());
 }
 
