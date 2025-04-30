@@ -17,8 +17,8 @@
 
     <h2>1. GPU Firmware to Kernel Handoff</h2>
     <p>
-      When you power on the Raspberry Pi 3B, it’s not the CPU that wakes up first—it’s the GPU. A tiny bit of on-chip ROM code springs into action and kicks off the boot process by loading <code>bootcode.bin</code>, which sets up the SDRAM so there’s actually usable memory. Next, it loads <code>start.elf</code>, a binary that takes care of hardware setup like clocks and power rails. Once the system is stable, the GPU hands control over to you by loading your <code>kernel8.img</code> into memory and jumping straight into your code at the <code>_start</code> label—executing on core 0 in EL2.
-    </p>
+      When the Raspberry Pi 3B powers on, the CPU doesn't start running right away. Instead, the GPU is the first to wake up. It runs a small bit of code from on-chip ROM that loads <code>bootcode.bin</code> from the SD card, which sets up the SDRAM so the system has usable memory. Then it loads <code>start.elf</code>, which configures things like the system clock and power management. Once everything is set up, the GPU loads your <code>kernel8.img</code> into memory and jumps to the <code>_start</code> label. At this point, core 0 begins executing your code in EL2.
+    </p>    
     
 
     <h2>2. “Who Am I?”: Core ID Check</h2>
@@ -48,16 +48,17 @@
 
     <h2>4. Disabling Traps in EL2</h2>
     <pre><code>master:
-    mov   x0, #0x33FF
-    msr   cptr_el2, x0         // stop FP/SIMD faults to EL2
-    msr   hstr_el2, xzr        // stop system-register traps
-
-    mrs   x0, CPACR_EL1
-    orr   x0, x0, #(1<<20)|(1<<21)
-    msr   CPACR_EL1, x0        // allow FP/SIMD in EL1</code></pre>
+        mov   x0, #0x33FF
+        msr   cptr_el2, x0         // stop FP/SIMD faults to EL2
+        msr   hstr_el2, xzr        // stop system-register traps
+    
+        mrs   x0, CPACR_EL1
+        orr   x0, x0, #(1<<20)|(1<<21)
+        msr   CPACR_EL1, x0        // allow FP/SIMD in EL1</code></pre>
     <p>
-      By default, attempts to use floating-point or SIMD registers in EL1 trap back to EL2. We disable those traps, then grant EL1 full access to the FP/SIMD unit.
+      These instructions disable traps that would otherwise occur when EL1 code tries to access floating-point or SIMD instructions. I'm still not completely sure why this setup is needed just to drop from EL2 to EL1, since no floating-point code runs at that point. However, I do know that if this part is left out, later code that uses floating-point instructions (either directly or through compiled C functions) will crash. So even if the immediate effect isn't obvious, it's important to have this in place early.
     </p>
+    
 
     <h2>5. Setting Up the Hypervisor Register and VBAR</h2>
     <pre><code>    ldr   x0, =HCR_VALUE
