@@ -222,18 +222,20 @@
         mrs     x3, spsr_el1
         mrs     x4, far_el1
         b       exc_handler</code></pre>
-    <p>
-      This is our exception vector table for EL1. It defines how the CPU should respond to various kinds of exceptions: synchronous faults, IRQs, FIQs, and system errors (SError). Each entry is 128 bytes apart, which is required for proper alignment when the processor jumps to a specific offset in the table based on the exception type.
-    
-      For each case, we load key registers into known locations: 
-      <code>ESR_EL1</code> tells us what caused the exception, 
-      <code>ELR_EL1</code> stores the address the CPU was executing when it happened, 
-      <code>SPSR_EL1</code> is the saved program status, and 
-      <code>FAR_EL1</code> gives the faulting address (for memory-related exceptions). 
-      We also store an ID in <code>x0</code> to help the common handler distinguish the source.
-    
-      Finally, we branch to a shared <code>exc_handler</code>, where the exception is logged, handled, or causes a panic depending on the context. This keeps all exception types unified in a single place while still giving us the details needed to differentiate them.
-    </p>
+        <p>This is our exception vector table for EL1. It defines how the CPU should respond to various types of exceptions: synchronous faults, IRQs, FIQs, and system errors (SError). Each entry is placed 128 bytes apart to satisfy the alignment requirements for exception vector lookup.</p>
+
+        <ul>
+          <li><code>ESR_EL1</code> tells us what kind of exception occurred.</li>
+          <li><code>ELR_EL1</code> holds the address of the instruction that triggered the exception.</li>
+          <li><code>SPSR_EL1</code> saves the processor state at the time of the exception.</li>
+          <li><code>FAR_EL1</code> provides the faulting address in memory-related exceptions.</li>
+          <li><code>x0</code> is used to label the exception type (e.g. 0 for sync, 1 for IRQ, etc.).</li>
+        </ul>
+        
+        <p>
+          All exception cases branch to a single <code>exc_handler</code> function. This keeps handling unified while still giving us enough context to handle or report each type appropriately.
+        </p>
+        
     
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
