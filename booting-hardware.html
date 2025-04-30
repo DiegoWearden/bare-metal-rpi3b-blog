@@ -27,7 +27,7 @@
         cbz   x0, master             // If that number is zero, we’re on core 0
         b     proc_hang              // Otherwise, park this core</code></pre>
     <p>
-      When the CPU resets, every core has the same code in memory, but only one of them (core 0) actually needs to run the initialization sequence right away. We read <code>MPIDR_EL1</code>, which among other things tells us “I’m core 0,” “I’m core 1,” up to “I’m core 3.” The lowest eight bits of that register (called “Affinity Level 0”) hold exactly that piece of information. By masking with <code>0xFF</code>, we strip away everything else and end up with a number from 0 to 3. If it’s zero, this is the primary core and we jump into the <code>master</code> setup. If it’s non-zero, we branch to <code>proc_hang</code> and wait quietly until the primary core wakes us later on.
+      When the CPU resets, every core has the same code in memory, but only one of them (core 0) actually needs to run the initialization sequence right away. We read <code>MPIDR_EL1</code>, which among other things tells us “I’m core 0,” “I’m core 1,” up to “I’m core 3.” The lowest eight bits of that register (called “Affinity Level 0”) hold exactly that piece of information. By masking with <code>0xFF</code>, we strip away everything else and end up with a number from 0 to 3. If it’s zero, this is the primary core and we jump into the <code>primary</code> setup. If it’s non-zero, we branch to <code>proc_hang</code> and wait quietly until the primary core wakes us later on.
     </p>
     
     

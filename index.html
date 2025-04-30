@@ -11,44 +11,69 @@
 
   <div class="container py-5">
     <h1 class="mb-4">Diego's Bare-Metal Raspberry Pi Blog</h1>
-    <p class="lead">From booting your first kernel to enabling multi-core support and configuring the MMU — everything you need to go from 0 to OS on the Raspberry Pi 3B.</p>
+    <p class="lead">
+      This blog documents my journey building an operating system on the Raspberry Pi 3B, with the long-term goal of creating a fully-featured OS accompanied by comprehensive documentation for anyone interested in bare-metal programming on the Pi. My aim is to explain everything as clearly and thoroughly as I can—but there will be times when I don't yet fully understand something, or where pieces may be missing. In those cases, I’ll do my best to note that clearly.
+    </p>
 
     <hr class="my-4">
 
-    <h2 class="mb-3">Bootstrapping the Pi 3b</h2>
+    <h2 class="mb-3">Table of Contents</h2>
+
+    <h3 class="mt-4">Bootstrapping the Pi 3B</h3>
     <ul class="list-group mb-4">
       <li class="list-group-item">
         <a href="booting-hardware.html"><strong>Getting to C on Real Hardware</strong></a><br>
-        How to get code booting on the Raspberry Pi 3B and bring all cores into the C environment.
+        How to reach a C runtime on actual Pi 3B hardware and bring all cores online.
       </li>
     </ul>
 
-    <h2 class="mb-3">Memory Management</h2>
+    <h3 class="mt-4">Memory Management</h3>
     <ul class="list-group mb-4">
       <li class="list-group-item">
         <a href="mmu-and-cache.html"><strong>Enabling the MMU & Data Cache</strong></a><br>
-        Why you need the MMU for atomic instructions and how to turn on the data cache.
+        Why you need virtual memory for atomic instructions and how to turn on data caching.
       </li>
     </ul>
 
-    <h2 class="mb-3">Future Topics (Coming Soon)</h2>
-    <ul class="list-group">
+    <h3 class="mt-4">Upcoming Topics</h3>
+    <ul class="list-group mb-4">
       <li class="list-group-item">
         <a href="hdmi-output.html"><strong>HDMI Output</strong></a><br>
-        (Coming soon) How to get pixels on the screen.
+        (Coming soon) Getting graphics on the screen.
       </li>
       <li class="list-group-item">
         <a href="usb-drivers.html"><strong>USB Drivers</strong></a><br>
-        (Coming soon) Writing a USB host driver for input devices.
+        (Coming soon) Writing a USB host controller driver.
       </li>
       <li class="list-group-item">
         <a href="audio-output.html"><strong>Audio Output</strong></a><br>
-        (Coming soon) Getting sound through PWM or HDMI.
+        (Coming soon) Enabling sound via PWM or HDMI.
       </li>
       <li class="list-group-item">
         <a href="sd-card.html"><strong>SD Card Drivers</strong></a><br>
-        (Coming soon) Communicating with the SD card to read files.
+        (Coming soon) Communicating with the SD card interface.
       </li>
+    </ul>
+
+    <h3 class="mt-4">References & Resources</h3>
+    <ul class="list-group mb-4">
+      <li class="list-group-item">
+        <a href="https://github.com/raspberrypi/firmware">Raspberry Pi Firmware Repository</a><br>
+        Details on <code>bootcode.bin</code> and <code>start.elf</code>.
+      </li>
+      <li class="list-group-item">
+        <a href="https://developer.arm.com/documentation/ddi0601/latest">ARMv8-A Architecture Reference Manual</a><br>
+        Reference for system registers and exception handling.
+      </li>
+      <li class="list-group-item">
+        <a href="https://www.kynix.com/Documentation.html">Kustaa Nyholm’s Tiny printf</a><br>
+        A lightweight C <code>printf</code> implementation.
+      </li>
+      <li class="list-group-item">
+        <a href="https://www.kernel.org/doc/html/latest/arm/arm64/index.html">Linux Kernel ARM64 Documentation</a><br>
+        For deeper insights into MMU setup and cache maintenance.
+      </li>
+      <!-- Add your own references here -->
     </ul>
   </div>
 
