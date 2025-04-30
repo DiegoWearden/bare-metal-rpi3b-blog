@@ -9,151 +9,152 @@
 <body class="bg-light text-dark">
   <div class="container py-5">
     <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Home</a>
-    <h1>Deep Dive: Boot Code Explained</h1>
-    <p class="lead">Step-by-step commentary on every instruction from EL2 to your C kernel on the Raspberry Pi 3B.</p>
+    <h1>Booting on Real Raspberry Pi 3B Hardware</h1>
+    <p class="lead">
+      From power-on ROM to your first C function—let’s see how the Pi 3B GPU firmware loads your kernel, and then exactly what each assembly instruction does to get you into EL1.
+    </p>
     <hr>
 
-    <h2>1. Entry & Core-ID Check</h2>
-    <pre><code>_start:
-    mrs x0, mpidr_el1
-    and x0, x0, #0xFF        // extract core ID (bits[7:0])
-    cbz x0, master           // if core ID == 0, jump to master
-    b   proc_hang            // otherwise hang here</code></pre>
-    <ul>
-      <li><code>mrs x0, mpidr_el1</code>: read CPU’s Multiprocessor ID register into <code>x0</code>.</li>
-      <li><code>and x0, x0, #0xFF</code>: isolate the lower 8 bits = our core index (0–3).</li>
-      <li><code>cbz x0, master</code>: if core 0, go initialize; else branch to <code>proc_hang</code>.</li>
-    </ul>
-
-    <h2>2. Parking Secondary Cores</h2>
-    <pre><code>proc_hang:
-    wfe                     // wait for event (low-power spin)
-    b proc_hang             // loop forever</code></pre>
+    <h2>🔌 1. Power-On to <code>kernel8.img</code></h2>
     <p>
-      Other cores spin here until <code>wake_up_cores</code> issues a <code>sev</code> (send-event), waking them to start up.
+      On reset, the Broadcom SoC’s **on-chip ROM** (running on the GPU) reads the SD card’s FAT32 boot partition. It first loads:
+    </p>
+    <ul>
+      <li><code>bootcode.bin</code> → initializes SDRAM</li>
+      <li><code>start.elf</code> → the closed-source GPU firmware</li>
+    </ul>
+    <p>
+      Finally, <code>start.elf</code> reads and copies your <code>kernel8.img</code> into RAM and jumps to its entry point—your `_start` label—running initially in EL2 on **core 0**.
     </p>
 
-    <h2>3. Master Core: Disable Traps & Prepare EL2</h2>
-    <pre><code>master:
-    // Prevent EL1’s FP/SIMD or sysreg access from trapping to EL2
-    mov x0, #0x33FF
-    msr cptr_el2, x0        // CPTR_EL2: disable traps to EL2
-    msr hstr_el2, xzr       // HSTR_EL2: don’t trap system registers
+    <h2>🧵 2. Core ID Check & Secondary Parking</h2>
+    <pre><code>_start:
+    mrs   x0, mpidr_el1
+    and   x0, x0, #0xFF        // core ID = bits[7:0]
+    cbz   x0, master           // if core 0 → master
+    b     proc_hang            // else park</code></pre>
+    <p>
+      - <code>mpidr_el1</code> tells us which CPU we’re on.<br>
+      - Non-zero cores go to <code>proc_hang</code>:
+    </p>
+    <pre><code>proc_hang:
+    wfe                         // wait for event (low-power spin)
+    b proc_hang</code></pre>
+    <p>
+      They’ll remain here until we later issue a `sev` to wake them.
+    </p>
 
-    // Allow EL1 full FP/SIMD use
-    mrs x0, CPACR_EL1
-    orr x0, x0, #(1<<20)|(1<<21)
-    msr CPACR_EL1, x0</code></pre>
+    <h2>🔧 3. Master Core EL2 Setup</h2>
+    <pre><code>master:
+    // Prevent FP/SIMD and sysreg traps
+    mov   x0, #0x33FF
+    msr   cptr_el2, x0         // CPTR_EL2: no trap to EL2
+    msr   hstr_el2, xzr        // HSTR_EL2: no sysreg traps
+
+    // Enable full FP/SIMD in EL1
+    mrs   x0, CPACR_EL1
+    orr   x0, x0, #(0b01<<20) | (0b01<<21)
+    msr   CPACR_EL1, x0</code></pre>
     <ul>
-      <li><code>cptr_el2</code>: stops traps of floating/SIMD ops back to EL2.</li>
-      <li><code>hstr_el2</code>: stops trapping any system register accesses to EL2.</li>
-      <li><code>CPACR_EL1</code>: bits 20–21 = <code>11</code> allow EL1 use of FP/SIMD.</li>
+      <li><strong>CPTR_EL2</strong>: stops FP/SIMD ops from trapping back to EL2.</li>
+      <li><strong>HSTR_EL2</strong>: stops system-register traps.</li>
+      <li><strong>CPACR_EL1[21:20]=11</strong>: allows EL1 full FP/SIMD access.</li>
     </ul>
 
-    <h2>4. Configure Hypervisor & Vector Base</h2>
+    <h2>⚙️ 4. Hypervisor Configuration & Vector Base</h2>
     <pre><code>    // Switch EL1 to AArch64
-    ldr x0, =HCR_VALUE
-    msr hcr_el2, x0
+    ldr   x0, =HCR_VALUE
+    msr   hcr_el2, x0
 
     // Point EL1 exceptions to our table
-    ldr x0, =_vectors
-    msr vbar_el1, x0</code></pre>
-    <ul>
-      <li><code>HCR_EL2.RW=1</code> makes EL1 use AArch64 instead of AArch32.</li>
-      <li><code>VBAR_EL1</code> is set to the address of your exception vector table.</li>
-    </ul>
+    ldr   x0, =_vectors
+    msr   vbar_el1, x0</code></pre>
+    <p>
+      - <code>HCR_EL2.RW=1</code> → EL1 runs 64-bit.<br>
+      - <code>VBAR_EL1</code> → where EL1 exception handlers live.
+    </p>
 
-    <h2>5. Set Up & Perform the EL2→EL1 Transition</h2>
-    <pre><code>    // Prepare SPSR_EL2 for EL1h return
-    mov x0, #0x3C4          // Mode=EL1h, mask IRQ/FIQ/SError
-    msr spsr_el2, x0
+    <h2>🔁 5. Prepare & Perform EL2→EL1 Transition</h2>
+    <pre><code>    // Prepare return to EL1h (mask interrupts)
+    mov   x0, #0x3C4
+    msr   spsr_el2, x0
 
-    // Where EL1 will begin execution
-    adr x0, el1_entry
-    msr elr_el2, x0
+    // Set EL1 PC to el1_entry
+    adr   x0, el1_entry
+    msr   elr_el2, x0
 
-    eret                    // return to EL1h at el1_entry</code></pre>
-    <ul>
-      <li><code>SPSR_EL2</code>: program state for EL1 (use EL1h stack, interrupts masked).</li>
-      <li><code>ELR_EL2</code>: sets the EL1 PC to <code>el1_entry</code>.</li>
-      <li><code>eret</code>: performs the exception return, dropping from EL2 to EL1.</li>
-    </ul>
+    eret                         // drop to EL1h</code></pre>
+    <p>
+      - <strong>SPSR_EL2</strong>: sets PSTATE for EL1h, IRQ/FIQ/SError masked.<br>
+      - <strong>ELR_EL2</strong>: return address = <code>el1_entry</code>.<br>
+      - <code>eret</code>: performs the switch into EL1.
+    </p>
 
-    <h2>6. EL1 Entry: Clear BSS & Initialize Stack</h2>
+    <h2>🛠️ 6. EL1 Entry, BSS Clear & Stack Setup</h2>
     <pre><code>el1_entry:
-    // Zero out .bss
-    adr  x0, __bss_start
-    adr  x1, __bss_end
-    sub  x1, x1, x0
-    bl   memzero
+    // Zero .bss
+    adr   x0, __bss_start
+    adr   x1, __bss_end
+    sub   x1, x1, x0
+    bl    memzero
 
-    // Build a safe C stack
-    mov  sp, #LOW_MEMORY
-    bl   pickKernelStack    // returns new SP in x0
-    mov  sp, x0
+    // Build safe C stack directly in EL1
+    mov   sp, #LOW_MEMORY
+    bl    pickKernelStack     // returns final SP in x0
+    mov   sp, x0
 
-    bl   primary_kernel_init
-    b    proc_hang</code></pre>
+    bl    primary_kernel_init
+    b     proc_hang</code></pre>
     <ul>
-      <li><code>memzero</code>: clears uninitialized data.</li>
-      <li>We explicitly set <code>sp</code> in EL1 to a known base, then call <code>pickKernelStack</code> to get the final per-core stack pointer.</li>
-      <li><code>primary_kernel_init</code> is your first C function.</li>
+      <li><code>memzero</code>: wipes uninitialized data.</li>
+      <li>We explicitly set <code>sp</code> in EL1 (not via <code>sp_el1</code>), then call C.</li>
     </ul>
 
-    <h2>7. Wake & Start Secondary Cores</h2>
+    <h2>🚀 7. Waking Secondary Cores</h2>
     <pre><code>wake_up_cores:
     adr   x0, secondary
-    str   x0, [0xE0]        // write the entry address for core 1
-    str   x0, [0xE8]        // core 2
-    str   x0, [0xF0]        // core 3
-    sev                     // send event to wake them</code></pre>
+    str   x0, [0xE0]           // entry for core 1
+    str   x0, [0xE8]           // core 2
+    str   x0, [0xF0]           // core 3
+    sev                         // send-event wakes them</code></pre>
+
+    <h2>👥 8. Secondary Core Startup in EL1</h2>
+    <pre><code>secondary_kernel_main:
+    // compute per-core stack
+    mrs   x0, mpidr_el1
+    and   x0, x0, #0xFF
+    mov   x1, #SECTION_SIZE
+    mul   x1, x1, x0
+    add   x1, x1, #LOW_MEMORY
+    mov   sp, x1
+    bl    pickKernelStack
+    mov   sp, x0
+
+    bl secondary_kernel_init
+    b  proc_hang</code></pre>
     <p>
-      Writing to the mailbox addresses at 0xE0, 0xE8, 0xF0 tells each parked core where to start. The <code>sev</code> wakes them from their <code>wfe</code> loops.
+      Secondary cores skip the EL2 setup (it was done once globally) and simply set up their own C stack in EL1 before calling C.
     </p>
 
-    <h2>8. Secondary Core Startup</h2>
-    <pre><code>secondary_kernel_main:
-    // Extract core ID and compute stack offset
-    mrs x0, mpidr_el1
-    and x0, x0, #0xFF
-    mov x1, #SECTION_SIZE
-    mul x1, x1, x0
-    add x1, x1, #LOW_MEMORY
-    mov sp, x1
-
-    bl pickKernelStack
-    mov sp, x0
-    bl secondary_kernel_init
-    b proc_hang</code></pre>
-    <ul>
-      <li>Secondary cores do the exact same stack-setup as the master (but entirely in EL1 after <code>eret</code>).</li>
-      <li><code>secondary_kernel_init</code> is their first C entry point.</li>
-    </ul>
-
-    <h2>9. Exception Vector Table</h2>
+    <h2>⚡️ 9. Exception Vector Table</h2>
     <pre><code>.align 11
 _vectors:
-    // Synchronous
-    .align 7
-    mov x0, #0
-    mrs x1, esr_el1
-    ...
-    b   exc_handler
+  // sync
+  .align 7
+  mov x0,#0; mrs x1,esr_el1; mrs x2,elr_el1; mrs x3,spsr_el1; mrs x4,far_el1
+  b exc_handler
 
-    // IRQ
-    .align 7
-    mov x0, #1
-    ...
-    b   exc_handler
+  // IRQ
+  .align 7
+  mov x0,#1; mrs x1,esr_el1; mrs x2,elr_el1; mrs x3,spsr_el1; mrs x4,far_el1
+  b exc_handler
 
-    // FIQ, SError similarly…
-</code></pre>
-    <p>
-      This table provides the addresses for synchronous, IRQ, FIQ, and SError handlers in EL1. Each entry branches to your common <code>exc_handler</code>.
-    </p>
+  // FIQ & SError similarly…</code></pre>
 
     <hr>
-    <p><em>With all of these steps explained in detail, you should have a rock-solid understanding of exactly how your Raspberry Pi 3B goes from power-on ROM to running your C kernel in EL1.</em></p>
+    <p><em>
+      By explicitly setting up your stack in EL1 and handling all traps and vector bases in EL2, this sequence takes you reliably from raw hardware into a fully-running C kernel on core 0—and then wakes up the other cores to do the same.
+    </em></p>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
