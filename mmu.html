@@ -27,9 +27,6 @@
     <p>
         This register points to the level 1 (top-level) translation table. When a virtual address is accessed, the MMU walks the table starting from this address to determine the corresponding physical address.
     </p>
-    <p>
-        In a minimal bare-metal kernel, we often configure <code>TTBR0_EL1</code> and <code>TTBR1_EL1</code> to point to the same page table to keep things simple, but it's worth knowing they’re normally used to separate user and kernel space.
-    </p>
     <h3>TTBR1_EL1 – Translation Table Base Register 1</h3>
     <p>
         <code>TTBR1_EL1</code> is one of the two main registers that hold the base address of a translation table. While <code>TTBR0_EL1</code> handles address translations for the lower part of the virtual address space, <code>TTBR1_EL1</code> is responsible for translations in the upper part of the virtual address space.
