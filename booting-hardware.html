@@ -127,7 +127,7 @@
     <p>
       When the Raspberry Pi powers on, only core 0 begins execution. The other cores are held in a low-power state using the <code>wfe</code> instruction. To bring them online, we write the address of our secondary core entry point into fixed memory locations that act as mailboxes for each core: 0xE0 for core 1, 0xE8 for core 2, and 0xF0 for core 3. These are monitored by the firmware. After writing the addresses, the <code>sev</code> instruction is used to broadcast a signal that wakes all sleeping cores.
     
-      This function is typically called after core 0 has completed its early initialization tasks. That includes setting up the UART, enabling <code>printf</code>, configuring the heap, and bringing up any necessary drivers or subsystems. By the time the secondary cores start running, the system is already in a usable state. This avoids repeating expensive initialization steps on every core and lets the secondaries immediately start using the infrastructure set up by core 0.
+      This function is typically called after core 0 has completed its early initialization tasks. That includes setting up the UART, enabling <code>printf</code>, virtual memory, configuring the heap, and bringing up any necessary drivers or subsystems. By the time the secondary cores start running, the system is already in a usable state. This avoids repeating expensive initialization steps on every core and lets the secondaries immediately start using the infrastructure set up by core 0.
     </p>
 
     <h2>9. EL2-to-EL1 Transition for Secondary Cores</h2>
