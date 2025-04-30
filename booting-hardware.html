@@ -62,13 +62,16 @@
 
     <h2>5. Setting Up the Hypervisor Register and VBAR</h2>
     <pre><code>    ldr   x0, =HCR_VALUE
-    msr   hcr_el2, x0          // EL1 runs 64-bit
-
-    ldr   x0, =_vectors
-    msr   vbar_el1, x0         // point EL1 exceptions here</code></pre>
+        msr   hcr_el2, x0          // Set EL1 to use AArch64 execution state
+    
+        ldr   x0, =_vectors
+        msr   vbar_el1, x0         // Set the exception vector base address for EL1</code></pre>
     <p>
-      <code>HCR_EL2.RW=1</code> switches EL1 into AArch64 mode. Then we install our exception vector table so that any trap in EL1 jumps to our handlers.
+      The <code>HCR_EL2</code> register controls how EL1 behaves when we return to it from EL2. Specifically, setting the <code>RW</code> bit (bit 31) to 1 tells the CPU that EL1 should run in AArch64 mode rather than AArch32. If this isn’t set, your code might end up running in the wrong execution state and behave unpredictably—or not at all.
+    
+      After that, we configure <code>VBAR_EL1</code>, which is the vector base address register for EL1. This tells the processor where to jump when an exception occurs (like an interrupt, system call, or fault) while running in EL1. By pointing it to our own <code>_vectors</code> table, we make sure any exceptions in our kernel get handled by our own code, not some undefined location.
     </p>
+    
 
     <h2>6. Preparing to Return to EL1</h2>
     <pre><code>    mov   x0, #0x3C4
