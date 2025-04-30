@@ -17,21 +17,6 @@ static bool smpInitDone = false;
 
 void kernel_init();
 
-extern "C" void print_current_sp() {
-    uint64_t core_id, sp;
-
-    // Get core ID from MPIDR_EL1
-    asm volatile("mrs %0, mpidr_el1" : "=r"(core_id));
-    core_id &= 0xFF;
-
-    // Read current SP
-    asm volatile("mov %0, sp" : "=r"(sp));
-
-    printf("Core %lu stack pointer (sp): 0x%lx\n", core_id, sp);
-}
-
-
-
 extern "C" uint64_t pickKernelStack(void) {
     return (uint64_t) &stacks.forCPU(smpInitDone ? getCoreID() : 0).bytes[Stack::BYTES];
 }
@@ -39,7 +24,6 @@ extern "C" uint64_t pickKernelStack(void) {
 
 extern "C" void secondary_kernel_init(){
     kernel_init();
-    
 }
 
 extern "C" void primary_kernel_init() {
@@ -54,8 +38,6 @@ extern "C" void primary_kernel_init() {
 }
 
 void kernel_init(){
-    if(getCoreID() == 1)
-        print_current_sp();
-    // printf("Hi, I'm core %d\n", getCoreID());
+    printf("Hi, I'm core %d\n", getCoreID());
 }
 

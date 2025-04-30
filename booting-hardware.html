@@ -61,7 +61,8 @@
     
 
     <h2>5. Setting Up the Hypervisor Register and VBAR</h2>
-    <pre><code>    ldr   x0, =HCR_VALUE
+    <pre><code>
+        ldr   x0, =HCR_VALUE
         msr   hcr_el2, x0          // Set EL1 to use AArch64 execution state
     
         ldr   x0, =_vectors
@@ -74,7 +75,8 @@
     
 
     <h2>6. Preparing to Return to EL1</h2>
-    <pre><code>    mov   x0, #0x3C4
+    <pre><code>
+        mov   x0, #0x3C4
         msr   spsr_el2, x0         // Set up the saved program status for EL1
     
         adr   x0, el1_entry
@@ -90,22 +92,30 @@
     </p>
     
 
-    <h2>7. EL1 Entry: BSS Clear & Stack Setup</h2>
+    <h2>7. EL1 Entry: BSS Clear and Stack Setup</h2>
     <pre><code>el1_entry:
-    adr   x0, __bss_start
-    adr   x1, __bss_end
-    sub   x1, x1, x0
-    bl    memzero              // clear .bss
-
-    mov   sp, #LOW_MEMORY      // temporary stack
-    bl    pickKernelStack      // returns final SP in x0
-    mov   sp, x0               // use it now
-
-    bl    primary_kernel_init
-    b     proc_hang</code></pre>
+        adr   x0, __bss_start
+        adr   x1, __bss_end
+        sub   x1, x1, x0
+        bl    memzero              // clear .bss
+    
+        mov   sp, #LOW_MEMORY      // temporary stack
+        bl    pickKernelStack      // returns final SP in x0
+        mov   sp, x0               // use it now
+    
+        bl    primary_kernel_init
+        b     proc_hang</code></pre>
     <p>
-      We zero uninitialized data, then explicitly build our C stack. First we point <code>sp</code> at a known safe address, call <code>pickKernelStack</code> to get a per-core stack, and then switch <code>sp</code> to it. Finally, we call into C.
+      When we enter EL1, the first thing we do is clear the <code>.bss</code> section. This section contains all global and static variables that are uninitialized or implicitly initialized to zero. The C runtime expects these to be zeroed out before execution begins. We calculate the size of the section and call <code>memzero</code> to clear it.
+    
+      This includes things like the <code>stacks</code> object, which is a global variable with no explicit initializer. Even though it reserves a large amount of memory, it goes into the <code>.bss</code> section and is not stored in the binary itself. The bootloader (or in our case, this code) ensures that it starts out filled with zeros.
+    
+      After that, we need a working stack. We first set <code>sp</code> to a known safe memory location to avoid crashing during early setup. Then we call <code>pickKernelStack</code>, which returns a stack pointer based on the core ID. Once we have the correct address, we switch <code>sp</code> over to it and continue.
+    
+      With memory cleared and a proper stack in place, we can safely enter C by calling <code>primary_kernel_init</code>.
     </p>
+    
+    
 
     <h2>8. Waking Up Secondary Cores</h2>
     <pre><code>wake_up_cores:
