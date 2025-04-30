@@ -12,18 +12,7 @@
      wfe
      b proc_hang
  
- master:
-     // Set up stack pointer for EL1
-     ldr x0, =LOW_MEMORY
-     msr sp_el1, x0
- 
- 
-     // Enable virtual and physical counter timers for EL1
-     mrs     x0, cnthctl_el2
-     orr     x0, x0, #3
-     msr     cnthctl_el2, x0
-     msr     cntvoff_el2, xzr
- 
+ master: 
      // Disable coprocessor traps in EL2
      mov     x0, #0x33FF
      msr     cptr_el2, x0
@@ -62,43 +51,19 @@
      bl pickKernelStack
      mov    sp, x0
  
-     //bl    wake_up_cores
- 
      bl    primary_kernel_init
      b     proc_hang        // should never come here
  
- secondary:
-     mrs x0, mpidr_el1
-     and x0, x0, #0xFF
-     mov x1, #SECTION_SIZE
-     mul x1, x1, x0
-     add x1, x1, #LOW_MEMORY
-     mov sp, x1
-     bl pickKernelStack
-     mov sp, x0
+secondary:
+
  
  setup_el1_for_secondary:
-     // Set up stack pointer for EL1 for secondary cores
-     mrs x0, mpidr_el1
-     and x0, x0, #0xFF
-     mov x1, #SECTION_SIZE
-     mul x1, x1, x0
-     add x1, x1, #LOW_MEMORY
-     msr sp_el1, x1
- 
-     // Enable virtual and physical counter timers for EL1
-     mrs     x0, cnthctl_el2
-     orr     x0, x0, #3
-     msr     cnthctl_el2, x0
-     msr     cntvoff_el2, xzr
- 
      // Disable coprocessor in EL2
      mov     x0, #0x33FF
      msr     cptr_el2, x0
      msr     hstr_el2, xzr
      mov     x0, #(3 << 20)
      msr     cpacr_el1, x0
- 
  
      // Configure EL2 (Hypervisor)
      ldr x0, =HCR_VALUE
@@ -116,8 +81,16 @@
      eret
  
  secondary_kernel_main:
-     bl secondary_kernel_init
-     b proc_hang
+    mrs x0, mpidr_el1
+    and x0, x0, #0xFF
+    mov x1, #SECTION_SIZE
+    mul x1, x1, x0
+    add x1, x1, #LOW_MEMORY
+    mov sp, x1
+    bl pickKernelStack
+    mov sp, x0
+    bl secondary_kernel_init
+    b proc_hang
  
  .global wake_up_cores
  wake_up_cores:
