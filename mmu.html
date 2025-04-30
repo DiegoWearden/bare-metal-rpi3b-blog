@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booting on Raspberry Pi 3B Hardware</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light text-dark">
+  <div class="container py-5">
+    <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Home</a>
+    <h1>Enabling the MMU</h1>
+    <p class="lead">
+        Before we can take advantage of things like virtual memory, address translation, and memory protection, we need to bring the Memory Management Unit (MMU) online. In this section, I'll talk through what needs to be configured and why its needed for a working kernel.
+    </p>
+    <hr>    
+
+    <h2>Important MMU Configuration Registers</h2>
+    <p>
+        Before diving into the complexities of actually building the MMU, I want to take some time to explain the key registers that control how memory translation works on the Raspberry Pi 3B’s ARMv8-A architecture.
+    </p>
+    
+    <h3>TTBR0_EL1 – Translation Table Base Register 0</h3>
+    <p>
+        <code>TTBR0_EL1</code> holds the base address of the page tables used to translate virtual addresses in the lower half of the address space (typically used for user processes, though in bare-metal contexts we can use it however we want). 
+    </p>
+    <p>
+        This register points to the level 1 (top-level) translation table. When a virtual address is accessed, the MMU walks the table starting from this address to determine the corresponding physical address.
+    </p>
+    <p>
+        In a minimal bare-metal kernel, we often configure <code>TTBR0_EL1</code> and <code>TTBR1_EL1</code> to point to the same page table to keep things simple, but it's worth knowing they’re normally used to separate user and kernel space.
+    </p>
+    <h3>TTBR1_EL1 – Translation Table Base Register 1</h3>
+    <p>
+        <code>TTBR1_EL1</code> is one of the two main registers that hold the base address of a translation table. While <code>TTBR0_EL1</code> handles address translations for the lower part of the virtual address space, <code>TTBR1_EL1</code> is responsible for translations in the upper part of the virtual address space.
+    </p>
+    <p>
+        When the MMU performs an address translation, it uses either <code>TTBR0_EL1</code> or <code>TTBR1_EL1</code> depending on the virtual address and configuration in the translation control register. This split allows the system to manage different memory regions with different access rules or purposes, such as separating user space and kernel space.
+    </p>
+
+    
+
