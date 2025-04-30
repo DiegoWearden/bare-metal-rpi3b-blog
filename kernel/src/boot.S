@@ -5,14 +5,14 @@
  _start:	
      mrs x0, mpidr_el1
      and x0, x0, #0xFF        // Check processor id
-     cbz x0, master           // Continue for primary CPU
+     cbz x0, primary           // Continue for primary CPU
      b proc_hang              // Hang for all non-primary CPUs
  
  proc_hang:
      wfe
      b proc_hang
  
- master: 
+ primary: 
      // Disable coprocessor traps in EL2
      mov     x0, #0x33FF
      msr     cptr_el2, x0
@@ -76,9 +76,6 @@ secondary:
      // Set ELR_EL2 to point to secondary_kernel_main
      adr x0, secondary_kernel_main
      msr elr_el2, x0
- 
-     // Transition to EL1
-     eret
  
  secondary_kernel_main:
     mrs x0, mpidr_el1
