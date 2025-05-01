@@ -176,7 +176,7 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
   <li>
     <code>UART0_FBRD</code> gets the fractional part, which is calculated with:
     $$ \text{Fractional} = \text{round}\left((\text{BaudDiv} - \text{Integer}) \times 64\right) $$
-    $$ \text{Fractional} = \text{round}(0.041666 \times 64) = 3 $$
+    $$ \text{Fractional} = \text{round}(0.041666 \times 64) ≈ 3 $$
   </li>
 </ul>
 <p>
