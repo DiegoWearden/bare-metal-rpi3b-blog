@@ -183,6 +183,41 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
   These two values together configure UART0 to produce a baud rate close to 115200. If the values are off, the receiving end may misinterpret the signal which would result in a lot of garbled text.
 </p>
 
+<h3>UART0_LCRH – Line Control Register</h3>
+<p>
+  This register sets the format of the data being transmitted and received over UART.
+</p>
+
+<ul>
+  <li><code>(1 &lt;&lt; 4)</code> sets the <strong>FEN</strong> bit (FIFO Enable). This enables both the transmit and receive <strong>FIFO (First In, First Out)</strong> buffers inside the UART hardware.</li>
+</ul>
+
+<p>
+  Each FIFO is a 16-byte queue that temporarily holds data as it's sent or received. Without FIFO enabled, the UART can only hold a single byte at a time in each direction, meaning the CPU must read or write each character exactly when it arrives or is ready to send—any delay might cause data loss or missed bytes.
+</p>
+
+<p>
+  With FIFOs enabled, the CPU doesn’t have to respond immediately to every character. The transmit FIFO can queue up to 16 bytes to be sent, and the receive FIFO can store up to 16 bytes that were received while the CPU was busy. This improves reliability and reduces how often the CPU must service the UART.
+</p>
+
+<p>
+  if you want to visually see this, there is this really cool interactive tool 
+  from Dr. Valvano from the ECE majors:
+  <a href="https://users.ece.utexas.edu/~valvano/Volume1/IntroToEmbSys/Ch9_SerialCommunication.htm#9_4" target="_blank">
+    UART FIFO Demo (Interactive Tool 9.4 – Dr. Valvano's Embedded Systems)
+  </a>.
+</p>
+
+
+<ul>
+  <li><code>(1 &lt;&lt; 5) | (1 &lt;&lt; 6)</code> sets the word length to <strong>8 bits</strong>. The combination <code>WLEN[1:0] = 0b11</code> tells the UART to send and receive data as 8-bit values, which is standard for most text-based communication.</li>
+</ul>
+
+<p>
+  These bits are the final step in the UART bring-up process. Without them, nothing would flow in or out of the UART hardware—even if everything else was configured correctly.
+</p>
+
+
 
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
