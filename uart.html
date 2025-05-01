@@ -108,16 +108,84 @@ put32(GPPUDCLK0, 0);</code></pre>
 
 <h3>Explanation of the Code</h3>
 <ul>
-  <li><code>GPPUD</code> is the GPIO Pull-Up/Down Register. Writing <code>0</code> disables both pull-up and pull-down resistors.</li>
-  <li><code>delay(150)</code> waits to give the setting time to take effect (this is required by the Broadcom documentation).</li>
-  <li><code>GPPUDCLK0</code> is the GPIO Pull-Up/Down Clock Register. Writing <code>1 &lt;&lt; 14 | 1 &lt;&lt; 15</code> tells the hardware to apply the pull-up/down setting (from <code>GPPUD</code>) to GPIO14 and GPIO15 specifically.</li>
-  <li>Another <code>delay(150)</code> ensures the clock pulse is stable before we clear it.</li>
-  <li><code>put32(GPPUDCLK0, 0)</code> clears the clock register to complete the update.</li>
+  <li>
+    <code>put32(GPPUD, 0)</code> writes <code>0</code> to the GPIO Pull-Up/Down (PUD) register, which disables any internal pull-up or pull-down resistors for all GPIO pins. 
+    This is important because UART lines (TX and RX) are actively driven and shouldn’t be influenced by internal bias resistors.
+  </li>
+  <li>
+    <code>delay(150)</code> introduces a short delay to give the new setting time to propagate internally before applying it to specific pins. 
+    According to the Broadcom documentation (page 101), this delay is required to ensure the next step functions correctly.
+  </li>
+  <li>
+    <code>put32(GPPUDCLK0, (1 &lt;&lt; 14) | (1 &lt;&lt; 15))</code> writes to the Pull-Up/Down Clock register. 
+    This doesn't set a clock, it’s a mechanism that tells the hardware, “apply the pull setting we just configured (from <code>GPPUD</code>) to GPIO14 and GPIO15.” 
+    Setting bits 14 and 15 targets those specific pins.
+  </li>
+  <li>
+    <code>delay(150)</code> ensures the pull-up/down setting has enough time to latch into the target pins before we remove the clock signal.
+  </li>
+  <li>
+    <code>put32(GPPUDCLK0, 0)</code> clears the clock bits, which finalizes the configuration. 
+    Without this final step, the change may not reliably take effect, especially on real hardware.
+  </li>
 </ul>
+
 
 <p>
   This is how the Raspberry Pi’s hardware expects pull-up/down settings to be configured. If you skip it or apply it incorrectly, there is a chance UART output will be unstable.
 </p>
+
+<h2>Setting the Baud Rate</h2>
+<pre><code>put32(UART0_IBRD, 26);  // Integer part of baud rate divisor
+put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
+
+<p>
+  These two lines configure the baud rate for UART0, which determines how fast data is sent and received over the serial line. 
+  The UART clock on the Raspberry Pi 3B is typically set to <strong>48 MHz</strong>, and we want a standard baud rate of <code>115200</code> bits per second for serial communication.
+</p>
+
+<h3>Baud Rate Divisor Formula</h3>
+<p>
+  The UART uses a clock divider to compute the baud rate from the source clock. The equation is:
+</p>
+
+<p style="font-size: 1.2em; font-family: monospace;">
+  <strong>BaudDiv</strong> = <span style="text-decoration: underline;">UART_CLK</span> / (16 × BaudRate)
+</p>
+
+<p>
+  For a 48 MHz UART clock and a target baud rate of 115200:
+</p>
+
+<p style="font-size: 1.2em; font-family: monospace;">
+  <strong>BaudDiv</strong> = 48,000,000 / (16 × 115200) = 26.041666...
+</p>
+
+<h3>Breaking That Into Registers</h3>
+<ul>
+  <li>
+    <code>UART0_IBRD</code> gets the <strong>integer part</strong> of the divisor. In this case, <strong>26</strong>.
+  </li>
+  <li>
+    <code>UART0_FBRD</code> gets the <strong>fractional part</strong>, computed as:
+    <p style="font-size: 1.1em; font-family: monospace;">
+      Fractional = round((BaudDiv − IntegerPart) × 64)
+    </p>
+    <p style="font-size: 1.1em; font-family: monospace;">
+      Fractional = round((0.041666) × 64) ≈ <strong>3</strong>
+    </p>
+  </li>
+</ul>
+
+<p>
+  These two values together configure UART0 to produce a baud rate very close to 115200. If the values are off, the receiving end may misinterpret the signal, resulting in garbled or failed communication.
+</p>
+
+
+<p>
+  These two values together configure the UART hardware to generate a baud rate extremely close to 115200. If the divisor is too far off, you may experience garbled text or communication failures, so getting this right is critical.
+</p>
+
 
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
