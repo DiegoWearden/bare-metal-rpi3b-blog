@@ -214,8 +214,38 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
 </ul>
 
 <p>
-  These bits are the final step in the UART bring-up process. Without them, nothing would flow in or out of the UART hardware—even if everything else was configured correctly.
+  So this line of code configures UART0 for standard 8-bit data transmission and enables internal buffering, making it easier to work with in a bare metal environment.
 </p>
+
+<h2>Enabling UART0: Transmit and Receive</h2>
+<pre><code>put32(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9)); // UARTEN, TXE, RXE</code></pre>
+
+<p>
+  Once we've finished configuring the UART peripheral (pins, baud rate, data format, etc.), the final step is to turn it on.
+  This is done by writing to the <code>UART0_CR</code> register, which controls the high-level behavior of the UART hardware.
+</p>
+
+<p>In this case, we are setting three specific bits:</p>
+
+<ul>
+  <li>
+    <strong>Bit 0 – <code>UARTEN</code>:</strong> Enables the UART itself. If this bit is <code>0</code>, the UART stays off regardless of any other settings. This bit must be <code>1</code> to activate the UART hardware.
+  </li>
+  <li>
+    <strong>Bit 8 – <code>TXE</code> (Transmit Enable):</strong> Enables the transmitter circuitry. Without this, even if UART is enabled, it won’t send any characters.
+  </li>
+  <li>
+    <strong>Bit 9 – <code>RXE</code> (Receive Enable):</strong> Enables the receiver circuitry, allowing UART to accept incoming characters.
+  </li>
+</ul>
+
+<p>
+  By writing all three bits at once using bitwise OR, we enable the UART, transmitter, and receiver simultaneously:
+</p>
+
+<pre><code>put32(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));</code></pre>
+<p>This completes our UART initialization and makes it fully operational.</p>
+
 
 
 
