@@ -287,7 +287,7 @@ put32(UART0_DR, c);</code></pre>
     This ensures we don’t overrun the transmit buffer. Without this check, we might lose data if the UART is still sending previous characters.
   </li>
   <li>
-    With <code>uart_putc</code>, we can output individual characters to the serial terminal — essential for debugging, status messages, or character-by-character printing.
+    With <code>uart_putc</code>, we can output individual characters to the serial terminal which is essential for debugging.
   </li>
 </ul>
 
@@ -310,6 +310,45 @@ put32(UART0_DR, c);</code></pre>
 <p>
   Together, these three functions form the basic tools you need to do meaningful I/O in a bare-metal environment. They give you visibility into what your kernel is doing — even before a screen or debugger is available.
 </p>
+
+<h2>Wiring Up <code>printf</code></h2>
+
+<p>
+  Now that we have basic UART functionality with <code>uart_putc</code>, we can hook it up to a lightweight <code>printf</code> implementation to make formatted output much easier to work with. I won't go too deep into the internals of how <code>printf</code> works, but at a high level, all it does is take your format string (things like <code>%d</code>, <code>%x</code>, etc.), process the arguments, and output each character one by one using a function you provide — in our case, <code>uart_putc</code>. So effectively, <code>printf</code> is just a wrapper that formats a string and passes the characters to UART. Instead of focusing on the string formatting logic in <code>printf.cpp</code>, let's look at how <code>printf</code> is wired up to actually send data to the UART.
+</p>
+
+<p>
+  In <code>kernel.cpp</code>, we initialize <code>printf</code> like this:
+</p>
+
+<pre><code>init_printf(nullptr, uart_putc_wrapper);</code></pre>
+
+<p>
+  This tells the <code>printf</code> system to use our <code>uart_putc_wrapper</code> function to write characters. Here's what that function looks like:
+</p>
+
+<pre><code>void uart_putc_wrapper(void* p, char c) {
+    (void)p; // Unused
+    if (c == '\n') {
+        uart_putc('\r'); // Carriage return for terminals
+    }
+    uart_putc(c);
+}</code></pre>
+
+<ul>
+  <li><strong>The <code>void* p</code> argument</strong> exists so that <code>printf</code> can pass context around if needed, but we ignore it here.</li>
+  <li><strong>The newline check</strong> ensures that every <code>\n</code> gets preceded by a <code>\r</code> (carriage return), which is required by many terminals to properly move the cursor to the beginning of the line. For some reason this is not needed on qemu, but on hardware it is very much needed.</li>
+  <li><strong><code>uart_putc(c)</code></strong> sends the character to the UART.</li>
+</ul>
+
+<p>
+  When you call <code>printf("Hello, world!\n")</code>, the internal implementation walks through each character of the formatted string and sends it one by one using your <code>uart_putc_wrapper</code> — which ultimately talks to the UART hardware.
+</p>
+
+<p>
+  With this setup, you now have formatted text output directly from your bare-metal kernel — no screen or OS required.
+</p>
+
 
 
 
