@@ -155,7 +155,7 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
 </p>
 
 <p style="font-size: 1.2em;">
-  $$ \textbf{BaudDiv} = \frac{\text{UART\_CLK}}{16 \times \text{BaudRate}} $$
+  $$ \textbf{BaudDiv} = \frac{\text{UART_CLK}}{16 \times \text{BaudRate}} $$
 </p>
 
 
@@ -163,26 +163,22 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
   For a 48 MHz UART clock and a target baud rate of 115200:
 </p>
 
-<p style="font-size: 1.2em; font-family: monospace;">
-  <strong>BaudDiv</strong> = 48,000,000 / (16 × 115200) = 26.041666...
+<p style="font-size: 1.2em;">
+  $$ \text{BaudDiv} = \frac{48{,}000{,}000}{16 \times 115200} \approx 26.041666\ldots $$
 </p>
 
 <h3>Breaking That Into Registers</h3>
 <ul>
   <li>
-    <code>UART0_IBRD</code> gets the integer part of the divisor. In this case, 26.
+    <code>UART0_IBRD</code> gets the integer part of the divisor. In this case:
+    $$ \text{Integer} = 26 $$
   </li>
   <li>
-    <code>UART0_FBRD</code> gets the fractional part, computed as:
-    <p style="font-size: 1.1em; font-family: monospace;">
-      Fractional = round((BaudDiv − IntegerPart) × 64)
-    </p>
-    <p style="font-size: 1.1em; font-family: monospace;">
-      Fractional = round((0.041666) × 64) ≈ <strong>3</strong>
-    </p>
+    <code>UART0_FBRD</code> gets the fractional part, which is calculated with:
+    $$ \text{Fractional} = \text{round}\left((\text{BaudDiv} - \text{Integer}) \times 64\right) $$
+    $$ \text{Fractional} = \text{round}(0.041666 \times 64) = 3 $$
   </li>
 </ul>
-
 <p>
   These two values together configure UART0 to produce a baud rate close to 115200. If the values are off, the receiving end may misinterpret the signal which would result in a lot of garbled text.
 </p>
