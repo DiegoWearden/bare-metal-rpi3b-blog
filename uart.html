@@ -245,8 +245,71 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
 </p>
 
 <pre><code>put32(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9));</code></pre>
-<p>This completes our UART initialization and makes it fully operational.</p>
+<p>
+  This completes our UART initialization and makes it fully operational. If we wanted to print characters to the serial console, we could now write to the UART’s transmit register, and the data would be sent out over GPIO14 (TX). Similarly, the UART is now ready to receive data on GPIO15 (RX), which we could read from the receive register (which is a hint at how printf works!).
+</p>
 
+
+<h2>Reading and Writing with UART</h2>
+
+<p>
+  Now that UART0 is configured and enabled, we can start communicating through it by sending and receiving individual characters. The following functions form the core of our low-level serial I/O layer. They allow us to interact with a terminal, print debug messages, or even build a command-line shell.
+</p>
+
+<h3><code>char uart_getc(void)</code></h3>
+<pre><code>while (get32(UART0_FR) & (1 << 4)) {
+    // wait for data
+}
+return (char)(get32(UART0_DR) & 0xFF);</code></pre>
+<ul>
+  <li>
+    The <code>UART0_FR</code> register contains flags describing the current state of the UART. Bit 4 (<code>RXFE</code>) indicates whether the receive FIFO is empty.
+  </li>
+  <li>
+    By spinning in a loop until the FIFO is not empty, we ensure that a character is available before we read from <code>UART0_DR</code>.
+  </li>
+  <li>
+    This function lets us receive input from a user or serial device one character at a time. It's the foundation for early command-line interfaces or reading input during kernel execution.
+  </li>
+</ul>
+
+<h3><code>void uart_putc(char c)</code></h3>
+<pre><code>while (get32(UART0_FR) & (1 << 5));
+put32(UART0_DR, c);</code></pre>
+<ul>
+  <li>
+    Bit 5 (<code>TXFF</code>) of the <code>UART0_FR</code> register tells us if the transmit FIFO is full.
+  </li>
+  <li>
+    We wait until there’s space before writing a new character to the <code>UART0_DR</code> register.
+  </li>
+  <li>
+    This ensures we don’t overrun the transmit buffer. Without this check, we might lose data if the UART is still sending previous characters.
+  </li>
+  <li>
+    With <code>uart_putc</code>, we can output individual characters to the serial terminal — essential for debugging, status messages, or character-by-character printing.
+  </li>
+</ul>
+
+<h3><code>void uart_puts(const char* str)</code></h3>
+<pre><code>while (*str) {
+    uart_putc(*str++);
+}</code></pre>
+<ul>
+  <li>
+    This is a helper function that sends a full null-terminated string over UART, character by character.
+  </li>
+  <li>
+    It's built on <code>uart_putc</code>, and provides a much more convenient way to output human-readable messages from your kernel.
+  </li>
+  <li>
+    Having this abstraction allows us to build higher-level output functions like <code>printf</code>, or log structured information as our OS runs.
+  </li>
+</ul>
+
+<p>
+  Together, these three functions form the basic tools you need to do meaningful I/O in a bare-metal environment. They give you visibility into what your kernel is doing — even before a screen or debugger is available.
+</p>
 
 
 
