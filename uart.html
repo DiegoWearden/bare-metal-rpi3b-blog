@@ -63,12 +63,28 @@ put32(GPFSEL1, selector);</code></pre>
 
     <h3>Explanation of the Code</h3>
     <ul>
-      <li><code>get32(GPFSEL1)</code> reads the current configuration of the <code>GPFSEL1</code> register.</li>
-      <li><code>&amp;= ~(7 << 12)</code> clears bits <code>14:12</code> (the function field for GPIO14) by zeroing out those three bits.</li>
-      <li><code>|= 4 << 12</code> sets bits <code>14:12</code> to <code>100</code>, which selects ALT0 mode for GPIO14 (UART TX).</li>
-      <li><code>&amp;= ~(7 << 15)</code> and <code>|= 4 << 15</code> do the exact same thing for GPIO15, setting it to ALT0 (UART RX).</li>
-      <li><code>put32(GPFSEL1, selector)</code> writes the updated value back to the <code>GPFSEL1</code> register, applying the configuration.</li>
+      <li>
+        <code>get32(GPFSEL1)</code> reads the current value of the GPIO Function Select register for GPIOs 10–19. 
+        Since GPIO14 and GPIO15 fall into this range, we start by fetching the current state so we can modify only the bits we care about without affecting other pins.
+      </li>
+      <li>
+        <code>&amp;= ~(7 &lt;&lt; 12)</code> clears bits 14–12, which correspond to the function select field for GPIO14. 
+        We must clear them first because we’re about to change this pin’s function, and we want to avoid leaving leftover bits that might point to a different mode.
+      </li>
+      <li>
+        <code>|= 4 &lt;&lt; 12</code> sets bits 14–12 to <code>100</code>, which configures GPIO14 to use <code>ALT0</code>. 
+        On the Pi 3B, this routes the pin to UART0’s TX (transmit) function.
+      </li>
+      <li>
+        <code>&amp;= ~(7 &lt;&lt; 15)</code> and <code>|= 4 &lt;&lt; 15</code> perform the exact same logic for GPIO15, clearing its function bits and setting them to ALT0 mode. 
+        This enables the UART0 RX (receive) line on that pin.
+      </li>
+      <li>
+        <code>put32(GPFSEL1, selector)</code> writes the modified configuration back into the <code>GPFSEL1</code> register. 
+        Only now do we commit the changes to the hardware, ensuring both pins are connected to the UART0 peripheral.
+      </li>
     </ul>
+    
 
     <p>
       After this configuration, GPIO14 and GPIO15 are connected to the UART0 hardware block inside the SoC. This allows us to send and receive serial data using the UART0 peripheral.
