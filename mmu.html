@@ -19,6 +19,14 @@
     <p>
         Before diving into the complexities of actually building the MMU, I want to take some time to explain the key registers that control how memory translation works on the Raspberry Pi 3B’s ARMv8-A architecture.
     </p>
+
+    <h3>TTBR1_EL1 – Translation Table Base Register 1</h3>
+    <p>
+        <code>TTBR1_EL1</code> is one of the two main registers that hold the base address of a translation table. While <code>TTBR0_EL1</code> handles address translations for the lower part of the virtual address space, <code>TTBR1_EL1</code> is responsible for translations in the upper part of the virtual address space.
+    </p>
+    <p>
+        When the MMU performs an address translation, it uses either <code>TTBR0_EL1</code> or <code>TTBR1_EL1</code> depending on the virtual address and configuration in the translation control register. This split allows the system to manage different memory regions with different access rules or purposes, such as separating user space and kernel space.
+    </p>
     
     <h3>TTBR0_EL1 – Translation Table Base Register 0</h3>
     <p>
@@ -26,13 +34,6 @@
     </p>
     <p>
         This register points to the level 1 (top-level) translation table. When a virtual address is accessed, the MMU walks the table starting from this address to determine the corresponding physical address.
-    </p>
-    <h3>TTBR1_EL1 – Translation Table Base Register 1</h3>
-    <p>
-        <code>TTBR1_EL1</code> is one of the two main registers that hold the base address of a translation table. While <code>TTBR0_EL1</code> handles address translations for the lower part of the virtual address space, <code>TTBR1_EL1</code> is responsible for translations in the upper part of the virtual address space.
-    </p>
-    <p>
-        When the MMU performs an address translation, it uses either <code>TTBR0_EL1</code> or <code>TTBR1_EL1</code> depending on the virtual address and configuration in the translation control register. This split allows the system to manage different memory regions with different access rules or purposes, such as separating user space and kernel space.
     </p>
 
     
