@@ -2,15 +2,18 @@
 #define _SYSREGS_H
 
 
-#define SCTLR_MMU_ENABLED                                         \
-((0xC00800) | /* set mandatory reserved bits */               \
- (1 << 12) |  /* I, Instruction cache enable */               \
- (1 << 4) |   /* SA0, Stack Alignment Check Enable for EL0 */ \
- (1 << 3) |   /* SA, Stack Alignment Check Enable */          \
- (1 << 2) |   /* C, Data cache enable */                      \
- (1 << 1) |   /* A, Alignment check enable bit */             \
- (1 << 11) |  /* Enable program flow prediction */            \
- (1 << 0))    /* M, enable MMU */
+#define SCTLR_MMU_ENABLED \
+    (                     \
+        (0xC00800) |      /* set mandatory reserved bits */              \
+        (1 << 12) |       /* I: enable instruction cache */              \
+        (1 << 4)  |       /* SA0: stack alignment faulting for EL0 */    \
+        (1 << 3)  |       /* SA: stack alignment faulting */             \
+        (1 << 2)  |       /* C: data cache enable */                     \
+        (1 << 1)  |       /* A: alignment faulting */                    \
+        (1 << 11) |       /* Z: program flow prediction */               \
+        (1 << 0)          /* M: MMU enable */                            \
+    )
+
 
 #define HCR_RW (1 << 31)
 #define HCR_VALUE HCR_RW
