@@ -222,8 +222,6 @@ void fb_print(const char* str, unsigned int color) {
 }
 
 
-
-
 void fb_clear(unsigned int color) {
     Framebuffer* fb = fb_get();
     unsigned int* fb_ptr = (unsigned int*)fb->buffer;

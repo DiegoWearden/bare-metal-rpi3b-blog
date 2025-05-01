@@ -15,6 +15,14 @@
       This blog documents my journey building a full multicore operating system on the Raspberry Pi 3B, with the long-term goal of producing a fully-featured OS accompanied by detailed documentation for anyone interested in bare-metal programming on the Pi. 
       As I progress, I’ll be creating and sharing “snapshots” of the OS at various stages of development, and each section in the blog corresponds to one of these snapshots. My goal is to explain every piece of the system as clearly and thoroughly as possible, but there may be parts I don’t fully understand yet or haven't implemented. In those cases, I’ll do my best to call that out explicitly.
     </p>
+
+    <p>
+      This blog was also born out of the challenges I faced during <a href="https://github.com/BajuMcBites/OStrich/tree/main" target="_blank">OStrich</a>, a class project where we built an operating system from scratch. One of the biggest hurdles was the lack of solid, accessible documentation for getting things running on real Raspberry Pi 3B hardware. A lot of online resources make it really easy for someone to figure out how to implement something on QEMU, but less on hardware. In particular, setting up multicore support and locks was much harder than expected because of how scattered and incomplete the information was. Several of my classmates ran into the same frustrations and ended up dropping hardware support entirely.
+    </p>
+    <p>
+      My goal is to create a space where everything is explained with hardware in mind. The code and walkthroughs you’ll find here are built to run directly on the Pi 3B, not just in QEMU, and where they don’t yet, that’s something I’m working to improve. There’s still a lot I don’t know, but I’ll document my learning as I go. I want this to become a clear, practical, and reliable guide for anyone who wants to dive into bare metal development on the Raspberry Pi.
+    </p>    
+    
     <p>
       <a href="https://github.com/DiegoWearden/bare-metal-rpi3b-blog/tree/main" target="_blank">
         The source code that each post refers to is available here
