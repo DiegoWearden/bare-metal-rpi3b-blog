@@ -10,11 +10,11 @@
   <div class="container py-5">
 
     <div class="alert alert-info">
-      📚 Reference: <a href="https://www.raspberrypi.org/app/uploads/2012/02/BCM2835-ARM-Peripherals.pdf" target="_blank">
+      Reference: <a href="https://www.raspberrypi.org/app/uploads/2012/02/BCM2835-ARM-Peripherals.pdf" target="_blank">
         Broadcom BCM2835 ARM Peripherals Manual (PDF)
       </a>
     </div>
-    
+
     <a href="index.html" class="btn btn-outline-secondary mb-4">⭠ Back to Home</a>
     <h1>UART and printf</h1>
     <p class="lead">
@@ -32,7 +32,7 @@ put32(GPFSEL1, selector);</code></pre>
 
     <h3>What is ALT0?</h3>
     <p>
-      On the Raspberry Pi, most GPIO pins are <strong>multiplexed</strong>, which means each pin can perform multiple functions depending on how you configure it. These functions include standard input/output, SPI, I2C, PWM, UART, and more.
+      On the Raspberry Pi, most GPIO pins are multiplexed, which means each pin can perform multiple functions depending on how you configure it. These functions include standard input/output, SPI, I2C, PWM, UART, and more.
     </p>
     <p>
       Each GPIO pin supports several alternate functions named <code>ALT0</code>, <code>ALT1</code>, <code>ALT2</code>, and so on. These correspond to different internal hardware blocks. For example:
