@@ -184,6 +184,7 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
 </p>
 
 <h3>UART0_LCRH – Line Control Register</h3>
+<pre><code>put32(UART0_LCRH, (1 << 4) | (1 << 5) | (1 << 6)); // UARTEN, TXE, RXE</code></pre>
 <p>
   This register sets the format of the data being transmitted and received over UART.
 </p>
