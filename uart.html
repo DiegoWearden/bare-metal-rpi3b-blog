@@ -202,7 +202,7 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
 
 <p>
   If you want to visually see this, there is this really cool interactive tool 
-  from Dr. Valvano from the ECE majors:
+  from Dr. Valvano Intro to Embedded Systems Class (from the ECE majors):
   <a href="https://users.ece.utexas.edu/~valvano/Volume1/IntroToEmbSys/Ch9_SerialCommunication.htm#9_3" target="_blank">
     UART FIFO Demo  – Dr. Valvano's Intro to Embedded Systems (scroll to Interactive Tool 9.4)
   </a>.
@@ -217,7 +217,7 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
   So this line of code configures UART0 for standard 8-bit data transmission and enables internal buffering, making it easier to work with in a bare metal environment.
 </p>
 
-<h2>Enabling UART0: Transmit and Receive</h2>
+<h2>Enabling UART0 - Transmit and Receive</h2>
 <pre><code>put32(UART0_CR, (1 << 0) | (1 << 8) | (1 << 9)); // UARTEN, TXE, RXE</code></pre>
 
 <p>
