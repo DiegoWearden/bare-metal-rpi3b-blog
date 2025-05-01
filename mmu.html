@@ -11,7 +11,7 @@
     <a href="index.html" class="btn btn-outline-secondary mb-4">← Back to Home</a>
     <h1>Enabling the MMU</h1>
     <p class="lead">
-        Since our kernel will be using multiple cores, enabling the MMU as early as possible is very important, as we will need to be able to use atomic instructions to have proper exclusion between cores. This is why it is the first thing that core 0 does when it enters the C code.
+        Since our kernel will be using multiple cores, enabling the MMU as early as possible is very important, as we will need to be able to use atomic instructions to have proper exclusion between cores. This is why it is the first thing that core 0 does after the inital hardware setup.
     </p>
     <hr>
 
@@ -32,5 +32,5 @@
 
     <h2>Creating the Page Tables</h2>
     <p>
-        
+
     </p>
