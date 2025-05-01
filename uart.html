@@ -141,7 +141,7 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
 
 <p>
   These two lines configure the baud rate for UART0, which determines how fast data is sent and received over the serial line. 
-  The UART clock on the Raspberry Pi 3B is typically set to <strong>48 MHz</strong>, and we want a standard baud rate of <code>115200</code> bits per second for serial communication.
+  The UART clock on the Raspberry Pi 3B is typically set to 48 MHz, and we want a standard baud rate of <code>115200</code> bits per second for serial communication.
 </p>
 
 <h3>Baud Rate Divisor Formula</h3>
@@ -164,10 +164,10 @@ put32(UART0_FBRD, 3);   // Fractional part of baud rate divisor</code></pre>
 <h3>Breaking That Into Registers</h3>
 <ul>
   <li>
-    <code>UART0_IBRD</code> gets the <strong>integer part</strong> of the divisor. In this case, <strong>26</strong>.
+    <code>UART0_IBRD</code> gets the integer part of the divisor. In this case, 26.
   </li>
   <li>
-    <code>UART0_FBRD</code> gets the <strong>fractional part</strong>, computed as:
+    <code>UART0_FBRD</code> gets the fractional part, computed as:
     <p style="font-size: 1.1em; font-family: monospace;">
       Fractional = round((BaudDiv − IntegerPart) × 64)
     </p>
