@@ -28,6 +28,7 @@ extern "C" void secondary_kernel_init(){
 
 extern "C" void primary_kernel_init() {
         uart_init();
+        uart_puts("uart initalized!!!\n\r");
         init_printf(nullptr, uart_putc_wrapper);
         printf("printf initialized!!!\n");
         // Initialize MMU page tables
