@@ -336,9 +336,9 @@ put32(UART0_DR, c);</code></pre>
 }</code></pre>
 
 <ul>
-  <li><strong>The <code>void* p</code> argument</strong> exists so that <code>printf</code> can pass context around if needed, but we ignore it here.</li>
-  <li><strong>The newline check</strong> ensures that every <code>\n</code> gets preceded by a <code>\r</code> (carriage return), which is required by many terminals to properly move the cursor to the beginning of the line. For some reason this is not needed on qemu, but on hardware it is very much needed.</li>
-  <li><strong><code>uart_putc(c)</code></strong> sends the character to the UART.</li>
+  <li>The <code>void* p</code> argument exists so that <code>printf</code> can pass context around if needed, but we ignore it here.</li>
+  <li>The newline check ensures that every <code>\n</code> gets preceded by a <code>\r</code> (carriage return), which is required by many terminals to properly move the cursor to the beginning of the line. For some reason this is not needed on qemu, but on hardware it is very much needed.</li>
+  <li><code>uart_putc(c)</code> sends the character to the UART.</li>
 </ul>
 
 <p>
