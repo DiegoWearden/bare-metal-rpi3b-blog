@@ -226,7 +226,7 @@
         mrs     x3, spsr_el1
         mrs     x4, far_el1
         b       exc_handler</code></pre>
-        <p>This is our exception vector table for EL1. It defines how the CPU should respond to various types of exceptions: synchronous faults, IRQs, FIQs, and system errors (SError). Each entry is placed 128 bytes apart to satisfy the alignment requirements for exception vector lookup.</p>
+        <p>This is our exception vector table for EL1, which I briefly mentioned earlier. It defines how the CPU should respond to various types of exceptions: synchronous faults, IRQs, FIQs, and system errors (SError). Each entry is placed 128 bytes apart to satisfy the alignment requirements for exception vector lookup.</p>
 
         <ul>
           <li><code>ESR_EL1</code> tells us what kind of exception occurred.</li>
