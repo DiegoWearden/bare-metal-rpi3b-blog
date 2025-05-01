@@ -106,7 +106,7 @@ put32(GPPUDCLK0, 0);</code></pre>
   When we use pins for UART (GPIO14 and GPIO15), we do not want any internal pull resistors affecting the voltage levels. UART lines are actively driven by both the Pi and the device it communicates with, so internal resistors would interfere with signal clarity.
 </p>
 
-<h3>How It Works</h3>
+<h3>Explanation of the Code</h3>
 <ul>
   <li><code>GPPUD</code> is the GPIO Pull-Up/Down Register. Writing <code>0</code> disables both pull-up and pull-down resistors.</li>
   <li><code>delay(150)</code> waits to give the setting time to take effect (this is required by the Broadcom documentation).</li>
