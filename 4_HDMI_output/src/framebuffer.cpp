@@ -26,8 +26,6 @@ static bool fb_init_done = false;
 int fb_init(void) {
     printf("Starting framebuffer initialization...\n");
 
-    //https://github.com/raspberrypi/firmware/wiki/Mailbox-framebuffer-interface
-
     mailbox[0] = 35 * 4;  // buffer size in bytes
     mailbox[1] = MAILBOX_TAG_REQUEST;
 
