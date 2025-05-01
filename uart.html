@@ -32,8 +32,7 @@ put32(GPFSEL1, selector);</code></pre>
 
     <h3>What is ALT0?</h3>
     <p>
-      On the Raspberry Pi, most GPIO pins are multiplexed, which means each pin can perform multiple functions depending on how you configure it. These functions include standard input/output, SPI, I2C, PWM, UART, and more.
-    </p>
+      On the Raspberry Pi, most GPIO pins are multiplexed, which means each pin can perform multiple functions depending on how you configure it. In our case, we will be configuring it for UART.
     <p>
       Each GPIO pin supports several alternate functions named <code>ALT0</code>, <code>ALT1</code>, <code>ALT2</code>, and so on. These correspond to different internal hardware blocks. For example:
     </p>
