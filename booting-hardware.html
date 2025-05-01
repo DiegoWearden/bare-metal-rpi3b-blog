@@ -184,7 +184,7 @@
     
       Once the temporary stack is in place, we call <code>pickKernelStack</code> to get the actual per-core stack pointer, which is aligned and allocated from a static array. This value replaces the temporary one, and the core now has a proper stack to use.
     
-      From there, we call <code>secondary_kernel_init</code>, which is the C-level entry point for non-primary cores. At this point, the core is ready to run in parallel with the rest of the system and can perform whatever tasks are assigned to it. We branch to proc_hang afterwards as a failsafe inces it ever returns from <code>secondary_kernel_init</code>, this it never is supposed to.
+      From there, we call <code>secondary_kernel_init</code>, which is the C-level entry point for non-primary cores. At this point, the core is ready to run in parallel with the rest of the system and can perform whatever tasks are assigned to it. We branch to proc_hang afterwards as a failsafe in case it ever returns from <code>secondary_kernel_init</code>, although it is never supposed to.
     </p>
     
 
