@@ -23,14 +23,14 @@ extern "C" uint64_t pickKernelStack(void) {
 
 
 extern "C" void secondary_kernel_init(){
+    // Cores 1, 2, 3 will come here
     kernel_init();
 }
 
 extern "C" void primary_kernel_init() {
-        uart_init();
-        init_printf(nullptr, uart_putc_wrapper);
-        printf("printf initialized!!!\n");
+        // Core 0 will come here
         // Initialize MMU page tables
+        // Initialize UART/printf 
         // Initialize heap
         smpInitDone = true;
         wake_up_cores();
@@ -38,7 +38,6 @@ extern "C" void primary_kernel_init() {
 }
 
 void kernel_init(){
-    printf("Hi, I'm core %d\n", getCoreID());
-    printf("in EL: %d\n", get_el());
+    // all cores will come here
 }
 
