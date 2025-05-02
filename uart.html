@@ -349,6 +349,37 @@ put32(UART0_DR, c);</code></pre>
   With this setup, you now have formatted text output directly from your bare-metal kernel (no screen or OS required).
 </p>
 
+<h2>Using <code>printf</code> in Exception Handlers</h2>
+<p>
+  One of the best parts about having <code>printf</code> working in a bare-metal environment is that you can now use it inside your exception handlers. This is incredibly helpful when something goes wrong and you want to know exactly what caused it.
+</p>
+
+<p>
+  For example, here’s what our exception handler might look like now:
+</p>
+
+<pre><code>extern "C" void exc_handler(unsigned long type, unsigned long esr, 
+                            unsigned long elr, unsigned long spsr, 
+                            unsigned long far) {
+    printf("\n=== Exception Handler Triggered ===\n");
+    printf("Type    : %lu\n", type);
+    printf("ESR_EL1 : 0x%lx\n", esr);
+    printf("ELR_EL1 : 0x%lx\n", elr);
+    printf("SPSR_EL1: 0x%lx\n", spsr);
+    printf("FAR_EL1 : 0x%lx\n", far);
+
+    while (1); // halt
+}</code></pre>
+
+<p>
+  With this in place, if your code triggers a synchronous exception or an invalid memory access, the handler will print out a full register dump over UART. That means you can immediately see the cause of the fault, what kind it was, where it happened, what the CPU state was, and what memory address was involved.
+</p>
+
+<p>
+  Before <code>printf</code>, debugging these issues meant blinking LEDs, setting up semihosting, or just guessing. Now, we can see the information from serial output.
+</p>
+
+
 
 
 
