@@ -96,20 +96,45 @@ put32(GPFSEL1, selector);</code></pre>
     </p>
 
     <h2>Disabling Pull-Up/Down Resistors</h2>
-<pre><code>// Disable pull-up/down for all GPIO pins & delay for changes to take effect
-put32(GPPUD, 0);
-delay(150);
-put32(GPPUDCLK0, (1 << 14) | (1 << 15));
-delay(150);
-put32(GPPUDCLK0, 0);</code></pre>
-
-<p>
-  GPIO pins on the Raspberry Pi have configurable internal pull-up and pull-down resistors. These resistors help stabilize the voltage level of a pin when it is not actively driven. Without them, a floating input pin could pick up random noise and behave unpredictably.
-</p>
-
-<p>
-  When we use pins for UART (GPIO14 and GPIO15), we do not want any internal pull resistors affecting the voltage levels. UART lines are actively driven by both the Pi and the device it communicates with, so internal resistors would interfere with signal clarity.
-</p>
+    <pre><code>// Disable pull-up/down for all GPIO pins & delay for changes to take effect
+    put32(GPPUD, 0);
+    delay(150);
+    put32(GPPUDCLK0, (1 << 14) | (1 << 15));
+    delay(150);
+    put32(GPPUDCLK0, 0);</code></pre>
+    
+    <p>
+      If a GPIO pin is set as an input and nothing is connected to it, the voltage level on that pin can float around randomly. This is called a "floating" pin. Because there is no solid electrical signal driving it high or low, it might pick up random electrical noise, which can cause your code to see unpredictable 1s and 0s.
+    </p>
+    
+    <p>
+      To deal with this, the Raspberry Pi lets you enable small internal resistors called pull-up or pull-down resistors. These help gently pull the pin toward a default value when nothing else is connected. A pull-up resistor makes the pin read as a 1, and a pull-down makes it read as a 0, unless another device overrides it.
+    </p>
+    
+    <p>
+      But for UART communication, we do not want any internal resistor interfering. The TX and RX lines are already being actively driven by both the Pi and the other device, like your computer. Since both ends are in full control of the signal, we want the line to be left completely untouched. Having an internal resistor pulling the line in a certain direction could cause small distortions in the signal and lead to unreliable communication.
+    </p>
+    
+    <p>
+      That is why we explicitly disable both pull-up and pull-down resistors on GPIO14 and GPIO15.
+    </p>
+    
+    <p>
+      To do that, the Broadcom SoC (page 101) requires a specific sequence to disable pull resistors:
+    </p>
+    
+    <ul>
+      <li><code>put32(GPPUD, 0)</code> tells the hardware to disable pull-up and pull-down for now.</li>
+      <li><code>delay(150)</code> gives the signal time to take effect internally.</li>
+      <li><code>put32(GPPUDCLK0, (1 << 14) | (1 << 15))</code> applies this change to GPIO14 and GPIO15.</li>
+      <li>We wait again, then call <code>put32(GPPUDCLK0, 0)</code> to finish the update and release the clock line.</li>
+    </ul>
+    
+    <p>
+      If you skip this step or do it incorrectly, your UART output may not work or could look like random garbage. On QEMU it might still work, but on actual hardware this setup is necessary.
+    </p>
+    
+    
 
 <h3>Explanation of the Code</h3>
 <ul>
