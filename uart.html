@@ -122,20 +122,6 @@ put32(GPFSEL1, selector);</code></pre>
     <p>
       To do that, the Broadcom SoC (page 101) requires a specific sequence to disable pull resistors:
     </p>
-    
-    <ul>
-      <li><code>put32(GPPUD, 0)</code> tells the hardware to disable pull-up and pull-down for now.</li>
-      <li><code>delay(150)</code> gives the signal time to take effect internally.</li>
-      <li><code>put32(GPPUDCLK0, (1 << 14) | (1 << 15))</code> applies this change to GPIO14 and GPIO15.</li>
-      <li>We wait again, then call <code>put32(GPPUDCLK0, 0)</code> to finish the update and release the clock line.</li>
-    </ul>
-    
-    <p>
-      If you skip this step or do it incorrectly, your UART output may not work or could look like random garbage. On QEMU it might still work, but on actual hardware this setup is necessary.
-    </p>
-    
-    
-
 <h3>Explanation of the Code</h3>
 <ul>
   <li>
