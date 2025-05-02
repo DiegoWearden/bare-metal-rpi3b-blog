@@ -39,20 +39,26 @@
         How to start execution on core 0, set up registers, prepare stacks, and transition into EL1 on real Raspberry Pi 3B hardware. This includes getting the system ready before any C code runs.
       </li>
     </ul>   
+    
+    <h3 class="mt-4">UART0 and printf</h3>
+    <ul class="list-group mb-4">
+      <li class="list-group-item">
+        <a href="uart.html"><strong>Initialize UART and printf for early bare-metal output</strong></a><br>
+        Learn how to bring up the UART hardware on the Raspberry Pi 3B and hook it into a minimal <code>printf</code> implementation to get early text output from your kernel.
+      </li>
+    </ul>
+    
 
     <h3 class="mt-4">Upcoming Topics</h3>
     <ul class="list-group mb-4">
       <li class="list-group-item">
-        <a href="mmu.html"><strong>Enabling the MMU (WIP)</strong></a><br>
-        How to enable the virtual memory and important features for multicore programming on the Pi 3B
+        <a href="mmu.html"><strong>Memory Management (WIP)</strong></a><br>
+        How to enable virtual memory and important features for multicore programming on the Pi 3B.
       </li>
-    </ul>
-    <ul class="list-group mb-4">
       <li class="list-group-item">
-        <a href="hdmi-output.html"><strong>How to Talk to the GPU on the Raspberry Pi 3B (WIP)</strong></a><br>
+        <a href="hdmi-output.html"><strong>HDMI Output (WIP)</strong></a><br>
         A guide to initializing the framebuffer using the mailbox interface so you can get pixels on the screen.
       </li>
-    <ul class="list-group mb-4">
       <li class="list-group-item">
         <a href="usb-drivers.html"><strong>USB Drivers</strong></a><br>
         (Coming soon) Writing a USB host controller driver.
@@ -66,6 +72,7 @@
         (Coming soon) Communicating with the SD card interface.
       </li>
     </ul>
+    
 
     <h3 class="mt-4">References & Resources</h3>
 <ul class="list-group mb-4">
