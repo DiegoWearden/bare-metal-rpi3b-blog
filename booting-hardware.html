@@ -57,7 +57,7 @@
       This section ensures that EL1 has a valid stack to use once we transition down from EL2. We first compute a temporary per-core stack pointer and assign it to <code>sp</code>, then use <code>pickKernelStack</code> to retrieve the proper aligned stack for that core. The key step is storing the final value in <code>SP_EL1</code> using <code>msr</code>.
     </p>
     <p>
-      This step is absolutely essential for exception handling. If <code>SP_EL1</code> is left uninitialized, the CPU will not know where to save state when an exception occurs — and your system will crash or behave unpredictably the first time an interrupt or fault is triggered.
+      This step is important for exception handling. If <code>SP_EL1</code> is left uninitialized, the CPU will not know where to save state when an exception occurs system will crash or behave unpredictably the first time a fault is triggered.
     </p>
           
           
