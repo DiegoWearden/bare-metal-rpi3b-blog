@@ -1,0 +1,325 @@
+
+Discarded input sections
+
+ .comment       0x0000000000000000       0x46 build/exec_cpp.o
+ .eh_frame      0x0000000000000000       0x30 build/exec_cpp.o
+ .group         0x0000000000000000        0xc build/kernel_cpp.o
+ .group         0x0000000000000000        0xc build/kernel_cpp.o
+ .group         0x0000000000000000        0xc build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .comment       0x0000000000000000       0x46 build/kernel_cpp.o
+ .eh_frame      0x0000000000000000      0x1b0 build/kernel_cpp.o
+ .comment       0x0000000000000000       0x46 build/libk_cpp.o
+ .eh_frame      0x0000000000000000      0x198 build/libk_cpp.o
+ .group         0x0000000000000000        0xc build/printf_cpp.o
+ .group         0x0000000000000000        0xc build/printf_cpp.o
+ .group         0x0000000000000000        0xc build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .text._ZN8SpinLockC2Ev
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .text._ZN8SpinLock4lockEv
+                0x0000000000000000       0x4c build/printf_cpp.o
+ .text._ZN8SpinLock6unlockEv
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .text._ZN6AtomicIbEC2Eb
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .text._ZN6AtomicIbE13monitor_valueEv
+                0x0000000000000000       0x14 build/printf_cpp.o
+ .text._ZN6AtomicIbE8exchangeEb
+                0x0000000000000000       0x34 build/printf_cpp.o
+ .text._ZN6AtomicIbE3setEb
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .comment       0x0000000000000000       0x46 build/printf_cpp.o
+ .eh_frame      0x0000000000000000      0x288 build/printf_cpp.o
+ .comment       0x0000000000000000       0x46 build/uart_cpp.o
+ .eh_frame      0x0000000000000000       0xd8 build/uart_cpp.o
+ .comment       0x0000000000000000       0x46 build/vm_cpp.o
+ .eh_frame      0x0000000000000000       0x30 build/vm_cpp.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+                0xffff000000080000                . = 0xffff000000080000
+
+.text           0xffff000000080000     0x2d98
+ *(.text.boot)
+ .text.boot     0xffff000000080000      0x9b8 build/boot_S.o
+                0xffff000000080108                wake_up_cores
+ *(.text .text.* .gnu.linkonce.t*)
+ .text          0xffff0000000809b8        0x0 build/boot_S.o
+ .text          0xffff0000000809b8       0x7c build/dcache_S.o
+                0xffff0000000809b8                clean_dcache_range
+                0xffff0000000809d0                invalidate_dcache_range
+                0xffff0000000809e8                clean_and_invalidate_dcache_range
+                0xffff000000080a00                clean_dcache_line
+                0xffff000000080a0c                invalidate_dcache_line
+                0xffff000000080a18                clean_and_invalidate_dcache_line
+                0xffff000000080a24                dmb
+                0xffff000000080a2c                dsb
+ .text          0xffff000000080a34       0x2c build/icache_S.o
+                0xffff000000080a34                invalidate_icache_range
+                0xffff000000080a4c                invalidate_icache_all
+                0xffff000000080a58                isb
+ .text          0xffff000000080a60       0x10 build/mm_S.o
+                0xffff000000080a60                memzero
+ .text          0xffff000000080a70       0x3c build/utils_S.o
+                0xffff000000080a70                put32
+                0xffff000000080a78                get32
+                0xffff000000080a80                delay
+                0xffff000000080a8c                getCoreID
+                0xffff000000080a98                get_el
+                0xffff000000080aa4                get_sp
+ *fill*         0xffff000000080aac        0x4 
+ .text          0xffff000000080ab0      0x210 build/vm_S.o
+                0xffff000000080ab0                create_page_tables
+                0xffff000000080c34                init_mmu
+ .text          0xffff000000080cc0       0x80 build/exec_cpp.o
+                0xffff000000080cc0                exc_handler
+ .text          0xffff000000080d40      0x164 build/kernel_cpp.o
+                0xffff000000080d40                pickKernelStack
+                0xffff000000080d88                secondary_kernel_init
+                0xffff000000080da4                primary_kernel_init
+                0xffff000000080e08                kernel_init()
+ .text._ZN8SpinLockC2Ev
+                0xffff000000080ea4       0x24 build/kernel_cpp.o
+                0xffff000000080ea4                SpinLock::SpinLock()
+                0xffff000000080ea4                SpinLock::SpinLock()
+ .text._ZN8SpinLock4lockEv
+                0xffff000000080ec8       0x4c build/kernel_cpp.o
+                0xffff000000080ec8                SpinLock::lock()
+ .text._ZN8SpinLock6unlockEv
+                0xffff000000080f14       0x24 build/kernel_cpp.o
+                0xffff000000080f14                SpinLock::unlock()
+ .text._ZN6AtomicIbEC2Eb
+                0xffff000000080f38       0x24 build/kernel_cpp.o
+                0xffff000000080f38                Atomic<bool>::Atomic(bool)
+                0xffff000000080f38                Atomic<bool>::Atomic(bool)
+ .text._ZN6AtomicIbE13monitor_valueEv
+                0xffff000000080f5c       0x14 build/kernel_cpp.o
+                0xffff000000080f5c                Atomic<bool>::monitor_value()
+ .text._ZN6AtomicIbE8exchangeEb
+                0xffff000000080f70       0x34 build/kernel_cpp.o
+                0xffff000000080f70                Atomic<bool>::exchange(bool)
+ .text._ZN6AtomicIbE3setEb
+                0xffff000000080fa4       0x24 build/kernel_cpp.o
+                0xffff000000080fa4                Atomic<bool>::set(bool)
+ .text._ZN6PerCPUI5StackE6forCPUEi
+                0xffff000000080fc8       0x24 build/kernel_cpp.o
+                0xffff000000080fc8                PerCPU<Stack>::forCPU(int)
+ .text          0xffff000000080fec      0x81c build/libk_cpp.o
+                0xffff000000080fec                K::strlen(char const*)
+                0xffff00000008103c                K::isdigit(int)
+                0xffff000000081070                K::streq(char const*, char const*)
+                0xffff0000000810ec                K::strncmp(char const*, char const*, int)
+                0xffff0000000811ec                K::strcmp(char const*, char const*)
+                0xffff00000008129c                K::strncpy(char*, char const*, int)
+                0xffff000000081354                K::strcpy(char*, char const*)
+                0xffff0000000813c8                K::strcat(char*, char const*)
+                0xffff000000081474                memcpy
+                0xffff0000000814a4                K::memcpy(void*, void const*, int)
+                0xffff000000081588                K::memset(void*, unsigned char, unsigned long)
+                0xffff0000000815e0                K::assert(bool, char const*)
+                0xffff00000008163c                K::check_stack()
+                0xffff000000081700                K::strntok(char*, char, int)
+                0xffff0000000817a8                K::strnlen(char*, int)
+ .text          0xffff000000081808     0x11d0 build/printf_cpp.o
+                0xffff000000081b40                tfp_format(void*, void (*)(void*, char), char const*, std::__va_list)
+                0xffff0000000824cc                init_printf(void*, void (*)(void*, char))
+                0xffff0000000825b0                tfp_printf(char const*, ...)
+                0xffff000000082678                tfp_sprintf(char*, char*, ...)
+                0xffff000000082730                tfp_error_printf(char const*, ...)
+                0xffff0000000827f8                tfp_printf_no_lock(char const*, ...)
+                0xffff0000000828b4                tfp_panic(char const*, ...)
+ .text          0xffff0000000829d8      0x2d0 build/uart_cpp.o
+                0xffff0000000829d8                uart_init()
+                0xffff000000082af4                uart_getc()
+                0xffff000000082b48                uart_putc(char)
+                0xffff000000082ba8                uart_puts(char const*)
+                0xffff000000082bec                uart_hex(unsigned int)
+                0xffff000000082c70                uart_putc_wrapper(void*, char)
+ .text          0xffff000000082ca8       0xf0 build/vm_cpp.o
+                0xffff000000082ca8                patch_page_tables()
+
+.iplt           0xffff000000082d98        0x0
+ .iplt          0xffff000000082d98        0x0 build/boot_S.o
+
+.rodata         0xffff000000082d98      0x184
+ *(.rodata .rodata.* .gnu.linkonce.r*)
+ .rodata        0xffff000000082d98       0x80 build/exec_cpp.o
+ .rodata        0xffff000000082e18       0x55 build/kernel_cpp.o
+ *fill*         0xffff000000082e6d        0x3 
+ .rodata        0xffff000000082e70       0x7b build/libk_cpp.o
+ *fill*         0xffff000000082eeb        0x5 
+ .rodata        0xffff000000082ef0       0x2c build/printf_cpp.o
+                [!provide]                        PROVIDE (_data = .)
+
+.rela.dyn       0xffff000000082f20        0x0
+ .rela.iplt     0xffff000000082f20        0x0 build/boot_S.o
+ .rela.text.boot
+                0xffff000000082f20        0x0 build/boot_S.o
+ .rela.text     0xffff000000082f20        0x0 build/boot_S.o
+
+.data           0xffff000000082f1c        0x0
+ *(.data .data.* .gnu.linkonce.d*)
+ .data          0xffff000000082f1c        0x0 build/boot_S.o
+ .data          0xffff000000082f1c        0x0 build/dcache_S.o
+ .data          0xffff000000082f1c        0x0 build/icache_S.o
+ .data          0xffff000000082f1c        0x0 build/mm_S.o
+ .data          0xffff000000082f1c        0x0 build/utils_S.o
+ .data          0xffff000000082f1c        0x0 build/vm_S.o
+ .data          0xffff000000082f1c        0x0 build/exec_cpp.o
+ .data          0xffff000000082f1c        0x0 build/kernel_cpp.o
+ .data          0xffff000000082f1c        0x0 build/libk_cpp.o
+ .data          0xffff000000082f1c        0x0 build/printf_cpp.o
+ .data          0xffff000000082f1c        0x0 build/uart_cpp.o
+ .data          0xffff000000082f1c        0x0 build/vm_cpp.o
+
+.igot.plt       0xffff000000082f20        0x0
+ .igot.plt      0xffff000000082f20        0x0 build/boot_S.o
+
+.init_array     0xffff000000082f20       0x10
+ .init_array    0xffff000000082f20        0x8 build/kernel_cpp.o
+ .init_array    0xffff000000082f28        0x8 build/printf_cpp.o
+
+.paging         0xffff000000083000     0x4000
+                0xffff000000083000                __paging_start = .
+ *(.paging)
+ .paging        0xffff000000083000     0x4000 build/vm_cpp.o
+                0xffff000000083000                PGD
+                0xffff000000084000                PUD
+                0xffff000000085000                PMD
+                0xffff000000086000                PMD_arm
+                0xffff000000087000                __paging_end = .
+
+.stacks         0xffff000000087000        0x0
+                0xffff000000087000                __stacks_start = .
+ *(.stacks)
+                0xffff000000087000                __stacks_end = .
+
+.bss            0xffff000000087000    0x20030
+                0xffff000000087000                . = ALIGN (0x10)
+                0xffff000000087000                __bss_start = .
+ *(.bss .bss.*)
+ .bss           0xffff000000087000        0x0 build/boot_S.o
+ .bss           0xffff000000087000        0x0 build/dcache_S.o
+ .bss           0xffff000000087000        0x0 build/icache_S.o
+ .bss           0xffff000000087000        0x0 build/mm_S.o
+ .bss           0xffff000000087000        0x0 build/utils_S.o
+ .bss           0xffff000000087000        0x0 build/vm_S.o
+ .bss           0xffff000000087000        0x0 build/exec_cpp.o
+ .bss           0xffff000000087000    0x20002 build/kernel_cpp.o
+                0xffff000000087000                stacks
+                0xffff0000000a7000                lock
+ .bss           0xffff0000000a7002        0x0 build/libk_cpp.o
+ *fill*         0xffff0000000a7002        0x6 
+ .bss           0xffff0000000a7008       0x28 build/printf_cpp.o
+                0xffff0000000a7008                printf_err_lock
+                0xffff0000000a7010                printf_lock
+                0xffff0000000a7018                panic_lock
+ .bss           0xffff0000000a7030        0x0 build/uart_cpp.o
+ .bss           0xffff0000000a7030        0x0 build/vm_cpp.o
+ *(COMMON)
+                0xffff0000000a7030                __bss_end = .
+                0xffff0000000a7030                _end = .
+
+/DISCARD/
+ *(.comment)
+ *(.gnu*)
+ *(.note*)
+ *(.eh_frame*)
+                0x0000000000004006                __bss_size = ((__bss_end - __bss_start) >> 0x3)
+LOAD build/boot_S.o
+LOAD build/dcache_S.o
+LOAD build/icache_S.o
+LOAD build/mm_S.o
+LOAD build/utils_S.o
+LOAD build/vm_S.o
+LOAD build/exec_cpp.o
+LOAD build/kernel_cpp.o
+LOAD build/libk_cpp.o
+LOAD build/printf_cpp.o
+LOAD build/uart_cpp.o
+LOAD build/vm_cpp.o
+OUTPUT(build/kernel.elf elf64-littleaarch64)
+LOAD linker stubs
+
+.debug_info     0x0000000000000000     0x1c9e
+ .debug_info    0x0000000000000000       0xf7 build/exec_cpp.o
+ .debug_info    0x00000000000000f7      0x6d3 build/kernel_cpp.o
+ .debug_info    0x00000000000007ca      0x76e build/libk_cpp.o
+ .debug_info    0x0000000000000f38      0xa25 build/printf_cpp.o
+ .debug_info    0x000000000000195d      0x1f0 build/uart_cpp.o
+ .debug_info    0x0000000000001b4d      0x151 build/vm_cpp.o
+
+.debug_abbrev   0x0000000000000000      0xae2
+ .debug_abbrev  0x0000000000000000       0x9a build/exec_cpp.o
+ .debug_abbrev  0x000000000000009a      0x35e build/kernel_cpp.o
+ .debug_abbrev  0x00000000000003f8      0x1d3 build/libk_cpp.o
+ .debug_abbrev  0x00000000000005cb      0x35c build/printf_cpp.o
+ .debug_abbrev  0x0000000000000927      0x100 build/uart_cpp.o
+ .debug_abbrev  0x0000000000000a27       0xbb build/vm_cpp.o
+
+.debug_aranges  0x0000000000000000      0x210
+ .debug_aranges
+                0x0000000000000000       0x30 build/exec_cpp.o
+ .debug_aranges
+                0x0000000000000030       0xb0 build/kernel_cpp.o
+ .debug_aranges
+                0x00000000000000e0       0x30 build/libk_cpp.o
+ .debug_aranges
+                0x0000000000000110       0xa0 build/printf_cpp.o
+ .debug_aranges
+                0x00000000000001b0       0x30 build/uart_cpp.o
+ .debug_aranges
+                0x00000000000001e0       0x30 build/vm_cpp.o
+
+.debug_line     0x0000000000000000      0xc1f
+ .debug_line    0x0000000000000000       0x63 build/exec_cpp.o
+ .debug_line    0x0000000000000063      0x206 build/kernel_cpp.o
+ .debug_line    0x0000000000000269      0x39c build/libk_cpp.o
+ .debug_line    0x0000000000000605      0x466 build/printf_cpp.o
+ .debug_line    0x0000000000000a6b      0x10d build/uart_cpp.o
+ .debug_line    0x0000000000000b78       0xa7 build/vm_cpp.o
+
+.debug_str      0x0000000000000000      0x8f7
+ .debug_str     0x0000000000000000      0x8f7 build/exec_cpp.o
+                                        0x143 (size before relaxing)
+ .debug_str     0x00000000000008f7      0x51a build/kernel_cpp.o
+ .debug_str     0x00000000000008f7      0x348 build/libk_cpp.o
+ .debug_str     0x00000000000008f7      0x550 build/printf_cpp.o
+ .debug_str     0x00000000000008f7      0x1cd build/uart_cpp.o
+ .debug_str     0x00000000000008f7      0x157 build/vm_cpp.o
+
+.debug_line_str
+                0x0000000000000000      0x114
+ .debug_line_str
+                0x0000000000000000      0x114 build/exec_cpp.o
+                                         0x94 (size before relaxing)
+ .debug_line_str
+                0x0000000000000114       0xd9 build/kernel_cpp.o
+ .debug_line_str
+                0x0000000000000114       0xac build/libk_cpp.o
+ .debug_line_str
+                0x0000000000000114       0xdb build/printf_cpp.o
+ .debug_line_str
+                0x0000000000000114       0x93 build/uart_cpp.o
+ .debug_line_str
+                0x0000000000000114       0x8e build/vm_cpp.o
+
+.debug_rnglists
+                0x0000000000000000       0xd9
+ .debug_rnglists
+                0x0000000000000000       0x68 build/kernel_cpp.o
+ .debug_rnglists
+                0x0000000000000068       0x71 build/printf_cpp.o

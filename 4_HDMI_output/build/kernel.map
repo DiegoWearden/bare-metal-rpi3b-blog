@@ -1,0 +1,395 @@
+
+Discarded input sections
+
+ .comment       0x0000000000000000       0x46 build/exec_cpp.o
+ .eh_frame      0x0000000000000000       0x30 build/exec_cpp.o
+ .group         0x0000000000000000        0xc build/framebuffer_cpp.o
+ .group         0x0000000000000000        0xc build/framebuffer_cpp.o
+ .group         0x0000000000000000        0xc build/framebuffer_cpp.o
+ .group         0x0000000000000000        0x8 build/framebuffer_cpp.o
+ .group         0x0000000000000000        0x8 build/framebuffer_cpp.o
+ .group         0x0000000000000000        0x8 build/framebuffer_cpp.o
+ .group         0x0000000000000000        0x8 build/framebuffer_cpp.o
+ .comment       0x0000000000000000       0x46 build/framebuffer_cpp.o
+ .eh_frame      0x0000000000000000      0x208 build/framebuffer_cpp.o
+ .group         0x0000000000000000        0xc build/kernel_cpp.o
+ .group         0x0000000000000000        0xc build/kernel_cpp.o
+ .group         0x0000000000000000        0xc build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .group         0x0000000000000000        0x8 build/kernel_cpp.o
+ .text._ZN8SpinLockC2Ev
+                0x0000000000000000       0x24 build/kernel_cpp.o
+ .text._ZN8SpinLock4lockEv
+                0x0000000000000000       0x4c build/kernel_cpp.o
+ .text._ZN8SpinLock6unlockEv
+                0x0000000000000000       0x24 build/kernel_cpp.o
+ .text._ZN6AtomicIbEC2Eb
+                0x0000000000000000       0x24 build/kernel_cpp.o
+ .text._ZN6AtomicIbE13monitor_valueEv
+                0x0000000000000000       0x14 build/kernel_cpp.o
+ .text._ZN6AtomicIbE8exchangeEb
+                0x0000000000000000       0x34 build/kernel_cpp.o
+ .text._ZN6AtomicIbE3setEb
+                0x0000000000000000       0x24 build/kernel_cpp.o
+ .comment       0x0000000000000000       0x46 build/kernel_cpp.o
+ .eh_frame      0x0000000000000000      0x1b0 build/kernel_cpp.o
+ .comment       0x0000000000000000       0x46 build/libk_cpp.o
+ .eh_frame      0x0000000000000000      0x198 build/libk_cpp.o
+ .comment       0x0000000000000000       0x46 build/mailbox_cpp.o
+ .eh_frame      0x0000000000000000       0x88 build/mailbox_cpp.o
+ .group         0x0000000000000000        0xc build/printf_cpp.o
+ .group         0x0000000000000000        0xc build/printf_cpp.o
+ .group         0x0000000000000000        0xc build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .group         0x0000000000000000        0x8 build/printf_cpp.o
+ .text._ZN8SpinLockC2Ev
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .text._ZN8SpinLock4lockEv
+                0x0000000000000000       0x4c build/printf_cpp.o
+ .text._ZN8SpinLock6unlockEv
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .text._ZN6AtomicIbEC2Eb
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .text._ZN6AtomicIbE13monitor_valueEv
+                0x0000000000000000       0x14 build/printf_cpp.o
+ .text._ZN6AtomicIbE8exchangeEb
+                0x0000000000000000       0x34 build/printf_cpp.o
+ .text._ZN6AtomicIbE3setEb
+                0x0000000000000000       0x24 build/printf_cpp.o
+ .comment       0x0000000000000000       0x46 build/printf_cpp.o
+ .eh_frame      0x0000000000000000      0x288 build/printf_cpp.o
+ .comment       0x0000000000000000       0x46 build/uart_cpp.o
+ .eh_frame      0x0000000000000000       0xd8 build/uart_cpp.o
+ .comment       0x0000000000000000       0x46 build/vm_cpp.o
+ .eh_frame      0x0000000000000000       0x30 build/vm_cpp.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+                0xffff000000080000                . = 0xffff000000080000
+
+.text           0xffff000000080000     0x3ca8
+ *(.text.boot)
+ .text.boot     0xffff000000080000      0x9b8 build/boot_S.o
+                0xffff000000080108                wake_up_cores
+ *(.text .text.* .gnu.linkonce.t*)
+ .text          0xffff0000000809b8        0x0 build/boot_S.o
+ .text          0xffff0000000809b8       0x7c build/dcache_S.o
+                0xffff0000000809b8                clean_dcache_range
+                0xffff0000000809d0                invalidate_dcache_range
+                0xffff0000000809e8                clean_and_invalidate_dcache_range
+                0xffff000000080a00                clean_dcache_line
+                0xffff000000080a0c                invalidate_dcache_line
+                0xffff000000080a18                clean_and_invalidate_dcache_line
+                0xffff000000080a24                dmb
+                0xffff000000080a2c                dsb
+ .text          0xffff000000080a34       0x2c build/icache_S.o
+                0xffff000000080a34                invalidate_icache_range
+                0xffff000000080a4c                invalidate_icache_all
+                0xffff000000080a58                isb
+ .text          0xffff000000080a60       0x10 build/mm_S.o
+                0xffff000000080a60                memzero
+ .text          0xffff000000080a70       0x3c build/utils_S.o
+                0xffff000000080a70                put32
+                0xffff000000080a78                get32
+                0xffff000000080a80                delay
+                0xffff000000080a8c                getCoreID
+                0xffff000000080a98                get_el
+                0xffff000000080aa4                get_sp
+ *fill*         0xffff000000080aac        0x4 
+ .text          0xffff000000080ab0      0x210 build/vm_S.o
+                0xffff000000080ab0                create_page_tables
+                0xffff000000080c34                init_mmu
+ .text          0xffff000000080cc0       0x80 build/exec_cpp.o
+                0xffff000000080cc0                exc_handler
+ .text          0xffff000000080d40      0xc54 build/framebuffer_cpp.o
+                0xffff000000080d40                fb_get()
+                0xffff000000080d4c                fb_init()
+                0xffff000000081138                draw_pixel(int, int, unsigned int)
+                0xffff00000008122c                draw_char(int, int, char, unsigned int)
+                0xffff000000081348                fb_scroll(int)
+                0xffff000000081638                fb_print(char const*, unsigned int)
+                0xffff0000000818ac                fb_clear(unsigned int)
+ .text._ZN8SpinLockC2Ev
+                0xffff000000081994       0x24 build/framebuffer_cpp.o
+                0xffff000000081994                SpinLock::SpinLock()
+                0xffff000000081994                SpinLock::SpinLock()
+ .text._ZN8SpinLock4lockEv
+                0xffff0000000819b8       0x4c build/framebuffer_cpp.o
+                0xffff0000000819b8                SpinLock::lock()
+ .text._ZN8SpinLock6unlockEv
+                0xffff000000081a04       0x24 build/framebuffer_cpp.o
+                0xffff000000081a04                SpinLock::unlock()
+ .text._ZN6AtomicIbEC2Eb
+                0xffff000000081a28       0x24 build/framebuffer_cpp.o
+                0xffff000000081a28                Atomic<bool>::Atomic(bool)
+                0xffff000000081a28                Atomic<bool>::Atomic(bool)
+ .text._ZN6AtomicIbE13monitor_valueEv
+                0xffff000000081a4c       0x14 build/framebuffer_cpp.o
+                0xffff000000081a4c                Atomic<bool>::monitor_value()
+ .text._ZN6AtomicIbE8exchangeEb
+                0xffff000000081a60       0x34 build/framebuffer_cpp.o
+                0xffff000000081a60                Atomic<bool>::exchange(bool)
+ .text._ZN6AtomicIbE3setEb
+                0xffff000000081a94       0x24 build/framebuffer_cpp.o
+                0xffff000000081a94                Atomic<bool>::set(bool)
+ .text          0xffff000000081ab8      0x19c build/kernel_cpp.o
+                0xffff000000081ab8                pickKernelStack
+                0xffff000000081b00                secondary_kernel_init
+                0xffff000000081b1c                primary_kernel_init
+                0xffff000000081bb8                kernel_init()
+ .text._ZN6PerCPUI5StackE6forCPUEi
+                0xffff000000081c54       0x24 build/kernel_cpp.o
+                0xffff000000081c54                PerCPU<Stack>::forCPU(int)
+ .text          0xffff000000081c78      0x81c build/libk_cpp.o
+                0xffff000000081c78                K::strlen(char const*)
+                0xffff000000081cc8                K::isdigit(int)
+                0xffff000000081cfc                K::streq(char const*, char const*)
+                0xffff000000081d78                K::strncmp(char const*, char const*, int)
+                0xffff000000081e78                K::strcmp(char const*, char const*)
+                0xffff000000081f28                K::strncpy(char*, char const*, int)
+                0xffff000000081fe0                K::strcpy(char*, char const*)
+                0xffff000000082054                K::strcat(char*, char const*)
+                0xffff000000082100                memcpy
+                0xffff000000082130                K::memcpy(void*, void const*, int)
+                0xffff000000082214                K::memset(void*, unsigned char, unsigned long)
+                0xffff00000008226c                K::assert(bool, char const*)
+                0xffff0000000822c8                K::check_stack()
+                0xffff00000008238c                K::strntok(char*, char, int)
+                0xffff000000082434                K::strnlen(char*, int)
+ .text          0xffff000000082494      0x18c build/mailbox_cpp.o
+                0xffff000000082494                mailbox_write
+                0xffff00000008251c                mailbox_read
+                0xffff00000008258c                gpu_convert_address
+                0xffff0000000825c0                mailbox_call
+ .text          0xffff000000082620     0x12c8 build/printf_cpp.o
+                0xffff000000082958                tfp_format(void*, void (*)(void*, char), char const*, std::__va_list)
+                0xffff0000000832e4                init_printf(void*, void (*)(void*, char))
+                0xffff0000000833c8                tfp_printf(char const*, ...)
+                0xffff0000000834e4                tfp_sprintf(char*, char*, ...)
+                0xffff00000008359c                tfp_error_printf(char const*, ...)
+                0xffff0000000836b8                tfp_printf_no_lock(char const*, unsigned int, ...)
+                0xffff0000000837bc                tfp_panic(char const*, ...)
+ .text          0xffff0000000838e8      0x2d0 build/uart_cpp.o
+                0xffff0000000838e8                uart_init()
+                0xffff000000083a04                uart_getc()
+                0xffff000000083a58                uart_putc(char)
+                0xffff000000083ab8                uart_puts(char const*)
+                0xffff000000083afc                uart_hex(unsigned int)
+                0xffff000000083b80                uart_putc_wrapper(void*, char)
+ .text          0xffff000000083bb8       0xf0 build/vm_cpp.o
+                0xffff000000083bb8                patch_page_tables()
+
+.iplt           0xffff000000083ca8        0x0
+ .iplt          0xffff000000083ca8        0x0 build/boot_S.o
+
+.rodata         0xffff000000083ca8      0xc3c
+ *(.rodata .rodata.* .gnu.linkonce.r*)
+ .rodata        0xffff000000083ca8       0x80 build/exec_cpp.o
+ .rodata        0xffff000000083d28      0x462 build/framebuffer_cpp.o
+ *fill*         0xffff00000008418a        0x6 
+ .rodata        0xffff000000084190      0x3a5 build/kernel_cpp.o
+ *fill*         0xffff000000084535        0x3 
+ .rodata        0xffff000000084538       0x7b build/libk_cpp.o
+ *fill*         0xffff0000000845b3        0x5 
+ .rodata        0xffff0000000845b8      0x32c build/printf_cpp.o
+                [!provide]                        PROVIDE (_data = .)
+
+.rela.dyn       0xffff0000000848e8        0x0
+ .rela.iplt     0xffff0000000848e8        0x0 build/boot_S.o
+ .rela.text.boot
+                0xffff0000000848e8        0x0 build/boot_S.o
+ .rela.text     0xffff0000000848e8        0x0 build/boot_S.o
+
+.data           0xffff0000000848e4        0x0
+ *(.data .data.* .gnu.linkonce.d*)
+ .data          0xffff0000000848e4        0x0 build/boot_S.o
+ .data          0xffff0000000848e4        0x0 build/dcache_S.o
+ .data          0xffff0000000848e4        0x0 build/icache_S.o
+ .data          0xffff0000000848e4        0x0 build/mm_S.o
+ .data          0xffff0000000848e4        0x0 build/utils_S.o
+ .data          0xffff0000000848e4        0x0 build/vm_S.o
+ .data          0xffff0000000848e4        0x0 build/exec_cpp.o
+ .data          0xffff0000000848e4        0x0 build/framebuffer_cpp.o
+ .data          0xffff0000000848e4        0x0 build/kernel_cpp.o
+ .data          0xffff0000000848e4        0x0 build/libk_cpp.o
+ .data          0xffff0000000848e4        0x0 build/mailbox_cpp.o
+ .data          0xffff0000000848e4        0x0 build/printf_cpp.o
+ .data          0xffff0000000848e4        0x0 build/uart_cpp.o
+ .data          0xffff0000000848e4        0x0 build/vm_cpp.o
+
+.igot.plt       0xffff0000000848e8        0x0
+ .igot.plt      0xffff0000000848e8        0x0 build/boot_S.o
+
+.init_array     0xffff0000000848e8       0x18
+ .init_array    0xffff0000000848e8        0x8 build/framebuffer_cpp.o
+ .init_array    0xffff0000000848f0        0x8 build/kernel_cpp.o
+ .init_array    0xffff0000000848f8        0x8 build/printf_cpp.o
+
+.mailbox        0xffff000000084900       0x8c
+ .mailbox       0xffff000000084900       0x8c build/mailbox_cpp.o
+                0xffff000000084900                mailbox
+
+.paging         0xffff000000085000     0x4000
+                0xffff000000085000                __paging_start = .
+ *(.paging)
+ .paging        0xffff000000085000     0x4000 build/vm_cpp.o
+                0xffff000000085000                PGD
+                0xffff000000086000                PUD
+                0xffff000000087000                PMD
+                0xffff000000088000                PMD_arm
+                0xffff000000089000                __paging_end = .
+
+.stacks         0xffff000000089000        0x0
+                0xffff000000089000                __stacks_start = .
+ *(.stacks)
+                0xffff000000089000                __stacks_end = .
+
+.bss            0xffff000000089000    0x20060
+                0xffff000000089000                . = ALIGN (0x10)
+                0xffff000000089000                __bss_start = .
+ *(.bss .bss.*)
+ .bss           0xffff000000089000        0x0 build/boot_S.o
+ .bss           0xffff000000089000        0x0 build/dcache_S.o
+ .bss           0xffff000000089000        0x0 build/icache_S.o
+ .bss           0xffff000000089000        0x0 build/mm_S.o
+ .bss           0xffff000000089000        0x0 build/utils_S.o
+ .bss           0xffff000000089000        0x0 build/vm_S.o
+ .bss           0xffff000000089000        0x0 build/exec_cpp.o
+ .bss           0xffff000000089000       0x2d build/framebuffer_cpp.o
+ *fill*         0xffff00000008902d        0x3 
+ .bss           0xffff000000089030    0x20002 build/kernel_cpp.o
+                0xffff000000089030                stacks
+                0xffff0000000a9030                lock
+ .bss           0xffff0000000a9032        0x0 build/libk_cpp.o
+ .bss           0xffff0000000a9032        0x0 build/mailbox_cpp.o
+ *fill*         0xffff0000000a9032        0x6 
+ .bss           0xffff0000000a9038       0x28 build/printf_cpp.o
+                0xffff0000000a9038                printf_err_lock
+                0xffff0000000a9040                printf_lock
+                0xffff0000000a9048                panic_lock
+ .bss           0xffff0000000a9060        0x0 build/uart_cpp.o
+ .bss           0xffff0000000a9060        0x0 build/vm_cpp.o
+ *(COMMON)
+                0xffff0000000a9060                __bss_end = .
+                0xffff0000000a9060                _end = .
+
+/DISCARD/
+ *(.comment)
+ *(.gnu*)
+ *(.note*)
+ *(.eh_frame*)
+                0x000000000000400c                __bss_size = ((__bss_end - __bss_start) >> 0x3)
+LOAD build/boot_S.o
+LOAD build/dcache_S.o
+LOAD build/icache_S.o
+LOAD build/mm_S.o
+LOAD build/utils_S.o
+LOAD build/vm_S.o
+LOAD build/exec_cpp.o
+LOAD build/framebuffer_cpp.o
+LOAD build/kernel_cpp.o
+LOAD build/libk_cpp.o
+LOAD build/mailbox_cpp.o
+LOAD build/printf_cpp.o
+LOAD build/uart_cpp.o
+LOAD build/vm_cpp.o
+OUTPUT(build/kernel.elf elf64-littleaarch64)
+LOAD linker stubs
+
+.debug_info     0x0000000000000000     0x29ee
+ .debug_info    0x0000000000000000       0xf7 build/exec_cpp.o
+ .debug_info    0x00000000000000f7      0xa20 build/framebuffer_cpp.o
+ .debug_info    0x0000000000000b17      0x719 build/kernel_cpp.o
+ .debug_info    0x0000000000001230      0x76e build/libk_cpp.o
+ .debug_info    0x000000000000199e      0x222 build/mailbox_cpp.o
+ .debug_info    0x0000000000001bc0      0xaed build/printf_cpp.o
+ .debug_info    0x00000000000026ad      0x1f0 build/uart_cpp.o
+ .debug_info    0x000000000000289d      0x151 build/vm_cpp.o
+
+.debug_abbrev   0x0000000000000000      0xf77
+ .debug_abbrev  0x0000000000000000       0x9a build/exec_cpp.o
+ .debug_abbrev  0x000000000000009a      0x321 build/framebuffer_cpp.o
+ .debug_abbrev  0x00000000000003bb      0x373 build/kernel_cpp.o
+ .debug_abbrev  0x000000000000072e      0x1d3 build/libk_cpp.o
+ .debug_abbrev  0x0000000000000901      0x139 build/mailbox_cpp.o
+ .debug_abbrev  0x0000000000000a3a      0x382 build/printf_cpp.o
+ .debug_abbrev  0x0000000000000dbc      0x100 build/uart_cpp.o
+ .debug_abbrev  0x0000000000000ebc       0xbb build/vm_cpp.o
+
+.debug_aranges  0x0000000000000000      0x2e0
+ .debug_aranges
+                0x0000000000000000       0x30 build/exec_cpp.o
+ .debug_aranges
+                0x0000000000000030       0xa0 build/framebuffer_cpp.o
+ .debug_aranges
+                0x00000000000000d0       0xb0 build/kernel_cpp.o
+ .debug_aranges
+                0x0000000000000180       0x30 build/libk_cpp.o
+ .debug_aranges
+                0x00000000000001b0       0x30 build/mailbox_cpp.o
+ .debug_aranges
+                0x00000000000001e0       0xa0 build/printf_cpp.o
+ .debug_aranges
+                0x0000000000000280       0x30 build/uart_cpp.o
+ .debug_aranges
+                0x00000000000002b0       0x30 build/vm_cpp.o
+
+.debug_line     0x0000000000000000     0x127a
+ .debug_line    0x0000000000000000       0x63 build/exec_cpp.o
+ .debug_line    0x0000000000000063      0x53f build/framebuffer_cpp.o
+ .debug_line    0x00000000000005a2      0x220 build/kernel_cpp.o
+ .debug_line    0x00000000000007c2      0x39c build/libk_cpp.o
+ .debug_line    0x0000000000000b5e       0xe3 build/mailbox_cpp.o
+ .debug_line    0x0000000000000c41      0x485 build/printf_cpp.o
+ .debug_line    0x00000000000010c6      0x10d build/uart_cpp.o
+ .debug_line    0x00000000000011d3       0xa7 build/vm_cpp.o
+
+.debug_str      0x0000000000000000      0xae1
+ .debug_str     0x0000000000000000      0xae1 build/exec_cpp.o
+                                        0x14f (size before relaxing)
+ .debug_str     0x0000000000000ae1      0x4a6 build/framebuffer_cpp.o
+ .debug_str     0x0000000000000ae1      0x533 build/kernel_cpp.o
+ .debug_str     0x0000000000000ae1      0x348 build/libk_cpp.o
+ .debug_str     0x0000000000000ae1      0x1c8 build/mailbox_cpp.o
+ .debug_str     0x0000000000000ae1      0x58a build/printf_cpp.o
+ .debug_str     0x0000000000000ae1      0x1cd build/uart_cpp.o
+ .debug_str     0x0000000000000ae1      0x157 build/vm_cpp.o
+
+.debug_line_str
+                0x0000000000000000      0x158
+ .debug_line_str
+                0x0000000000000000      0x158 build/exec_cpp.o
+                                         0xa4 (size before relaxing)
+ .debug_line_str
+                0x0000000000000158       0xda build/framebuffer_cpp.o
+ .debug_line_str
+                0x0000000000000158       0xf7 build/kernel_cpp.o
+ .debug_line_str
+                0x0000000000000158       0xbc build/libk_cpp.o
+ .debug_line_str
+                0x0000000000000158       0xc0 build/mailbox_cpp.o
+ .debug_line_str
+                0x0000000000000158       0xf9 build/printf_cpp.o
+ .debug_line_str
+                0x0000000000000158       0xa3 build/uart_cpp.o
+ .debug_line_str
+                0x0000000000000158       0x9e build/vm_cpp.o
+
+.debug_rnglists
+                0x0000000000000000      0x137
+ .debug_rnglists
+                0x0000000000000000       0x5e build/framebuffer_cpp.o
+ .debug_rnglists
+                0x000000000000005e       0x68 build/kernel_cpp.o
+ .debug_rnglists
+                0x00000000000000c6       0x71 build/printf_cpp.o
