@@ -15,13 +15,13 @@
     </p>
     <hr>
 
-    <h2>1. GPU Firmware to Kernel Handoff</h2>
+    <h2>GPU Firmware to Kernel Handoff</h2>
     <p>
       When the Raspberry Pi 3B powers on, the CPU doesn't start running right away. Instead, the GPU is the first to wake up. It runs a small bit of code from on-chip ROM that loads <code>bootcode.bin</code> from the SD card, which sets up the SDRAM so the system has usable memory. Then it loads <code>start.elf</code>, which configures things like the system clock and power management. Once everything is set up, the GPU loads your <code>kernel8.img</code> into memory and jumps to the <code>_start</code> label. At this point, core 0 begins executing your code in EL2.
     </p>    
     
 
-    <h2>2. “Who Am I?”: Core ID Check</h2>
+    <h2>“Who Am I?”: Core ID Check</h2>
     <pre><code>_start:
         mrs   x0, mpidr_el1          // Read the Multiprocessor Affinity Register
         and   x0, x0, #0xFF          // Keep only the lowest 8 bits (core number)
@@ -33,7 +33,7 @@
     
     
 
-    <h2>3. Parking Secondary Cores</h2>
+    <h2>Parking Secondary Cores</h2>
     <pre><code>proc_hang:
         wfe                     // Wait For Event: core goes into a low-power sleep
         b     proc_hang         // loop back and sleep again</code></pre>
@@ -47,10 +47,23 @@
           <p>
             On actual hardware, cores 1–3 start stalled inside the GPU’s ROM spin-loop and are only released once the primary core writes their start address into the mailbox registers and issues a <code>sev</code>. When they wake, they skip this parking loop entirely and instead begin execution in <code>secondary_kernel_main</code> as part of the controlled multicore startup path.
           </p>
-          
-    
 
-    <h2>4. Disabling Traps in EL2</h2>
+    <h2>Stack Setup for EL1 on the Primary Core</h2>
+    <pre><code>add   x1, x1, #LOW_MEMORY    // convert per-core offset into actual RAM address
+    mov   sp, x1                // use this as a temporary early stack
+    bl    pickKernelStack       // get the real, per-core stack pointer into x0
+    msr   sp_el1, x0            // install it as the EL1 stack pointer</code></pre>
+    <p>
+      This section ensures that EL1 has a valid stack to use once we transition down from EL2. We first compute a temporary per-core stack pointer and assign it to <code>sp</code>, then use <code>pickKernelStack</code> to retrieve the proper aligned stack for that core. The key step is storing the final value in <code>SP_EL1</code> using <code>msr</code>.
+    </p>
+    <p>
+      This step is absolutely essential for exception handling. If <code>SP_EL1</code> is left uninitialized, the CPU will not know where to save state when an exception occurs — and your system will crash or behave unpredictably the first time an interrupt or fault is triggered.
+    </p>
+          
+          
+
+
+    <h2>Disabling Traps in EL2</h2>
     <pre><code>master:
         mov   x0, #0x33FF
         msr   cptr_el2, x0         // stop FP/SIMD faults to EL2
@@ -64,7 +77,7 @@
     </p>
     
 
-    <h2>5. Setting Up the Hypervisor Register and VBAR</h2>
+    <h2>Setting Up the Hypervisor Register and VBAR</h2>
     <pre><code>
         ldr   x0, =HCR_VALUE
         msr   hcr_el2, x0          // Set EL1 to use AArch64 execution state
@@ -78,7 +91,7 @@
     </p>
     
 
-    <h2>6. Preparing to Return to EL1</h2>
+    <h2>reparing to Return to EL1</h2>
     <pre><code>
         mov   x0, #0x3C4
         msr   spsr_el2, x0         // Set up the saved program status for EL1
@@ -96,7 +109,7 @@
     </p>
     
 
-    <h2>7. EL1 Entry: BSS Clear and Stack Setup</h2>
+    <h2>EL1 Entry: BSS Clear and Stack Setup</h2>
     <pre><code>el1_entry:
         adr   x0, __bss_start
         adr   x1, __bss_end
@@ -121,7 +134,7 @@
     
     
 
-    <h2>8. Waking Up Secondary Cores</h2>
+    <h2>Waking Up Secondary Cores</h2>
     <pre><code>wake_up_cores:
         adr   x0, setup_el1_for_secondary
         str   x0, [0xE0]           // entry for core 1
@@ -135,60 +148,102 @@
     </p>
 
     <h2>9. EL2-to-EL1 Transition for Secondary Cores</h2>
-    <pre><code>
-    setup_el1_for_secondary:
-    mov   x0, #0x33FF
-    msr   cptr_el2, x0         // disable coprocessor traps
-    msr   hstr_el2, xzr        // disable sysreg traps
-    mov   x0, #(3 << 20)
-    msr   cpacr_el1, x0        // enable FP/SIMD in EL1
-
-    ldr   x0, =HCR_VALUE
-    msr   hcr_el2, x0          // set EL1 to run in AArch64
-
-    ldr   x0, =SPSR_VALUE
-    msr   spsr_el2, x0         // saved program status for EL1
-
-    adr   x0, secondary_kernel_main
-    msr   elr_el2, x0          // where execution resumes in EL1
-
-    eret                        // drop to EL1</code></pre>
+    <pre><code>setup_el1_for_secondary:
+        mrs x0, mpidr_el1
+        and x0, x0, #0xFF
+        mov x1, #SECTION_SIZE
+        mul x1, x1, x0
+        add x1, x1, #LOW_MEMORY
+        mov sp, x1                // temporary stack pointer for this core
+    
+        bl  pickKernelStack
+        msr sp_el1, x0            // install proper EL1 stack pointer
+    
+        // Disable traps in EL2
+        mov x0, #0x33FF
+        msr cptr_el2, x0          // disable FP/SIMD trapping to EL2
+        msr hstr_el2, xzr         // disable system register trapping
+        mov x0, #(3 << 20)
+        msr cpacr_el1, x0         // enable FP/SIMD access in EL1
+    
+        // Configure EL2 to drop into EL1 in 64-bit mode
+        ldr x0, =HCR_VALUE
+        msr hcr_el2, x0
+    
+        ldr x0, =_vectors
+        msr vbar_el1, x0          // set vector table for EL1
+    
+        // Set up return from EL2 to EL1
+        ldr x0, =SPSR_VALUE
+        msr spsr_el2, x0
+    
+        adr x0, secondary_kernel_main
+        msr elr_el2, x0
+    
+        eret                       // return to EL1</code></pre>
+    
     <p>
-  After each secondary core is woken up, it begins in EL2. Just like with core 0, we need to prepare for the switch into EL1. This involves disabling traps that would otherwise cause EL1 to fault if it accessed FP/SIMD or system registers. We then set <code>HCR_EL2</code> so that EL1 runs in 64-bit mode.
-
-  Next, we set <code>SPSR_EL2</code> to configure how the processor will behave when entering EL1. We set <code>ELR_EL2</code> to the address of <code>secondary_kernel_main</code>, which is where the core will jump once it exits EL2.
-
-  Finally, we call <code>eret</code>, which exits the current exception level and transfers control to EL1. From this point on, the core is running in the same environment as core 0.
+      After each secondary core is woken up, it begins execution in EL2. To bring it into the same environment as core 0, we must carefully prepare for the transition into EL1 the same way we did for core 0.
     </p>
-
-    
-    
-    
-
-    <h2>10. Secondary Core Initialization</h2>
-    <pre><code>secondary_kernel_main:
-        mrs   x0, mpidr_el1
-        and   x0, x0, #0xFF
-        mov   x1, #SECTION_SIZE
-        mul   x1, x1, x0
-        add   x1, x1, #LOW_MEMORY
-        mov   sp, x1               // temporary stack
-    
-        bl    pickKernelStack
-        mov   sp, x0               // final stack
-    
-        bl    secondary_kernel_init
-        b     proc_hang</code></pre>
+    <ul>
+      <li>We begin by assigning each core a unique stack in memory, using the core ID to compute an offset. This is important because the core needs a valid stack before anything else can work, especially exception handling.</li>
+      <li><code>pickKernelStack</code> returns a properly aligned per-core stack, which we install into <code>sp_el1</code>.</li>
+      <li>We then disable traps in EL2 that would otherwise prevent EL1 from using floating-point or system registers. This includes setting <code>cptr_el2</code>, <code>hstr_el2</code>, and <code>cpacr_el1</code>.</li>
+      <li><code>HCR_EL2</code> is configured to ensure EL1 will run in AArch64 mode, matching the state of the kernel.</li>
+      <li>We install the exception vector table by setting <code>VBAR_EL1</code>.</li>
+      <li>We set <code>SPSR_EL2</code> to define the state that EL1 will start in (EL1h, interrupts masked), and <code>ELR_EL2</code> to the address of <code>secondary_kernel_main</code>, which is where execution resumes after <code>eret</code>.</li>
+    </ul>
     <p>
-      After <code>eret</code> brings a secondary core into EL1, execution begins here. The first step is to establish a usable stack. We calculate a temporary stack address using the core ID, ensuring that each core lands on its own region of memory without overlapping with others.
-    
-      Once the temporary stack is in place, we call <code>pickKernelStack</code> to get the actual per-core stack pointer, which is aligned and allocated from a static array. This value replaces the temporary one, and the core now has a proper stack to use.
-    
-      From there, we call <code>secondary_kernel_init</code>, which is the C-level entry point for non-primary cores. At this point, the core is ready to run in parallel with the rest of the system and can perform whatever tasks are assigned to it. We branch to proc_hang afterwards as a failsafe in case it ever returns from <code>secondary_kernel_init</code>, although it is never supposed to.
+      Once everything is in place, we call <code>eret</code> to drop into EL1. From this point onward, the secondary core runs in the same environment as the primary core, with its own stack and full access to system features.
     </p>
     
 
-    <h2>11. Exception Vector Table</h2>
+    
+    
+    
+
+    <h2>EL2-to-EL1 Transition for Secondary Cores</h2>
+    <pre><code>setup_el1_for_secondary:
+        mrs x0, mpidr_el1
+        and x0, x0, #0xFF
+        mov x1, #SECTION_SIZE
+        mul x1, x1, x0
+        add x1, x1, #LOW_MEMORY
+        mov sp, x1
+    
+        bl  pickKernelStack
+        msr sp_el1, x0
+    
+        mov x0, #0x33FF
+        msr cptr_el2, x0
+        msr hstr_el2, xzr
+        mov x0, #(3 << 20)
+        msr cpacr_el1, x0
+    
+        ldr x0, =HCR_VALUE
+        msr hcr_el2, x0
+    
+        ldr x0, =_vectors
+        msr vbar_el1, x0
+    
+        ldr x0, =SPSR_VALUE
+        msr spsr_el2, x0
+    
+        adr x0, secondary_kernel_main
+        msr elr_el2, x0
+    
+        eret</code></pre>
+    
+    <p>
+      This code prepares each secondary core to drop from EL2 into EL1, following the same steps we used for core 0. We assign each core a temporary stack, install its real per-core stack using <code>sp_el1</code>, configure the relevant system registers, and then call <code>eret</code> to complete the transition.
+    </p>
+    <p>
+      Since we’ve already discussed each register and their purpose during the primary core's setup, this section just replicates that sequence for the other cores. The key difference is that <code>secondary_kernel_main</code> will be the entry point once the core enters EL1.
+    </p>
+    
+    
+
+    <h2>Exception Vector Table</h2>
     <pre><code>    .align 11
     _vectors:
         // Synchronous
