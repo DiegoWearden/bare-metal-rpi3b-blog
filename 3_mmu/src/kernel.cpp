@@ -39,6 +39,7 @@ extern "C" void primary_kernel_init() {
     uart_init();
     init_printf(nullptr, uart_putc_wrapper);
     printf("printf initialized!!!\n");
+    asm volatile("udf #0");
         // Initialize heap
     smpInitDone = true;
     clean_dcache_line(&smpInitDone);

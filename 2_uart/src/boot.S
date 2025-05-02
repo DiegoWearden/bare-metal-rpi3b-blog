@@ -13,6 +13,11 @@
      b proc_hang
  
  primary: 
+    add x1, x1, #LOW_MEMORY
+    mov sp, x1
+    bl pickKernelStack
+    msr sp_el1, x0
+
      // Disable coprocessor traps in EL2
      mov     x0, #0x33FF
      msr     cptr_el2, x0
@@ -55,6 +60,18 @@
      b     proc_hang        // should never come here
  
  setup_el1_for_secondary:
+
+    mrs x0, mpidr_el1
+    and x0, x0, #0xFF
+    mov x1, #SECTION_SIZE
+    mul x1, x1, x0
+    add x1, x1, #LOW_MEMORY
+    mov sp, x1
+
+    // Set up stack pointer for EL1 for secondary cores
+    bl pickKernelStack
+    msr sp_el1, x0
+
      // Disable coprocessor in EL2
      mov     x0, #0x33FF
      msr     cptr_el2, x0
@@ -65,6 +82,9 @@
      // Configure EL2 (Hypervisor)
      ldr x0, =HCR_VALUE
      msr hcr_el2, x0
+
+    ldr     x0, =_vectors
+    msr     vbar_el1, x0
  
      // Set up SPSR_EL2 to transition to EL1h
      ldr x0, =SPSR_VALUE
